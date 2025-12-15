@@ -1,0 +1,135 @@
+package com.petrol.GlitchSMP.utils;
+
+import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
+
+/**
+ * Contract implemented by every glitch ability. Each hook returns a {@link TriggerResult}
+ * describing whether the action consumed the ability and which cooldown (if any) to apply.
+ */
+public interface AbilityAttributes {
+    enum Stage {
+        BASE,
+        STAGE_MATRIX,
+        STAGE_CALAMITY
+    }
+
+    /**
+     * Encapsulates the outcome of an ability trigger.
+     */
+    record TriggerResult(boolean startCooldown, long cooldownMillis) {
+        public static TriggerResult none() {
+            return new TriggerResult(false, 0L);
+        }
+
+        public static TriggerResult consume(long cooldownMillis) {
+            return new TriggerResult(true, cooldownMillis);
+        }
+    }
+
+    /** Unique lowercase identifier used across handlers/configs. */
+    String getId();
+
+    /** Player-facing name for HUDs and logs. */
+    String getDisplayName();
+
+    /** Stage grouping for menus. */
+    default Stage getStage() {
+        return Stage.BASE;
+    }
+
+    /** Default cooldown applied whenever a trigger consumes the ability. */
+    default long getBaseCooldownMillis() {
+        return 0L;
+    }
+
+    /** Called when the player equips the glitch. */
+    default TriggerResult onEquip(Player player) {
+        return TriggerResult.none();
+    }
+
+    /** Called when the glitch is unequipped. */
+    default void onUnequip(Player player) {
+    }
+
+    /** Passive tick while equipped. */
+    default TriggerResult onTick(Player player, long tick) {
+        return TriggerResult.none();
+    }
+
+    /** Sneak + right click interaction. */
+    default TriggerResult onShiftRightClick(PlayerInteractEvent event) {
+        return TriggerResult.none();
+    }
+
+    /** Sneak + left click interaction. */
+    default TriggerResult onShiftLeftClick(PlayerInteractEvent event) {
+        return TriggerResult.none();
+    }
+
+    /** Regular right click (no sneak). */
+    default TriggerResult onRightClick(PlayerInteractEvent event) {
+        return TriggerResult.none();
+    }
+
+    /** Regular left click (no sneak). */
+    default TriggerResult onLeftClick(PlayerInteractEvent event) {
+        return TriggerResult.none();
+    }
+
+    /** Triggered when the player hits another entity. */
+    default TriggerResult onEntityHit(EntityDamageByEntityEvent event) {
+        return TriggerResult.none();
+    }
+
+    /** Triggered when the player is hit by another entity. */
+    default TriggerResult onEntityDamaged(EntityDamageByEntityEvent event) {
+        return TriggerResult.none();
+    }
+
+    /** Triggered when the player swaps items with their offhand while sneaking. */
+    default TriggerResult onOffhandSwap(PlayerSwapHandItemsEvent event) {
+        return TriggerResult.none();
+    }
+
+    /** Triggered on projectile launch by the player. */
+    default TriggerResult onProjectileLaunch(ProjectileLaunchEvent event) {
+        return TriggerResult.none();
+    }
+
+    /** Triggered when a projectile fired by the player lands. */
+    default TriggerResult onProjectileHit(ProjectileHitEvent event) {
+        return TriggerResult.none();
+    }
+
+    /** Triggered anytime the equipped player moves. */
+    default TriggerResult onPlayerMove(PlayerMoveEvent event) {
+        return TriggerResult.none();
+    }
+
+    /** Reacts to sneak toggles (useful for invisibility style glitches). */
+    default TriggerResult onSneakToggle(PlayerToggleSneakEvent event) {
+        return TriggerResult.none();
+    }
+
+    /** Called when the player's inventory is altered via clicks (for inventory scramble glitches). */
+    default TriggerResult onInventoryClick(InventoryClickEvent event) {
+        return TriggerResult.none();
+    }
+
+    /**
+     * Catch-all hook for custom triggers (e.g., scripted trials or timeline events).
+     * @param eventId identifier defined by higher-level systems
+     * @param payload optional context object
+     */
+    default TriggerResult onCustomEvent(String eventId, Player player, Object payload) {
+        return TriggerResult.none();
+    }
+}

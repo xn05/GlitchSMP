@@ -1,0 +1,6 @@
+name: main
+version: '1.0'
+main: com.petrol.GlitchSMP.main
+api-version: '1.21'
+authors: [inceptives]
+description: Optimise all Packets for minimal ping

@@ -1,0 +1,5 @@
+name: glitchsmp
+version: '1.0'
+main: com.petrol.GlitchSMP.GlitchSMP
+api-version: '1.21'
+authors: [ _Noctify ]
