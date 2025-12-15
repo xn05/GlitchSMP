@@ -15,12 +15,11 @@ public final class GlitchSMP extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        registry = new Registry(this);
+        registry = Registry.initialize(this);
         abilityHandler = new AbilityHandler(this, registry);
-        actionbarHandler = new ActionbarHandler(this, abilityHandler);
+        actionbarHandler = new ActionbarHandler(this, abilityHandler, registry);
         equipHandler = new EquipHandler(registry, abilityHandler);
 
-        registry.bootstrap();
         abilityHandler.start();
         actionbarHandler.start();
         Bukkit.getPluginManager().registerEvents(equipHandler, this);
@@ -41,5 +40,24 @@ public final class GlitchSMP extends JavaPlugin {
             abilityHandler.stop();
         }
         registry = null;
+    }
+
+    public void reloadGlitchPlugin() {
+        if (actionbarHandler != null) {
+            actionbarHandler.stop();
+        }
+        if (abilityHandler != null) {
+            abilityHandler.stop();
+        }
+        if (registry != null) {
+            registry = null;
+        }
+        registry = Registry.initialize(this);
+        abilityHandler = new AbilityHandler(this, registry);
+        actionbarHandler = new ActionbarHandler(this, abilityHandler, registry);
+        equipHandler = new EquipHandler(registry, abilityHandler);
+        abilityHandler.start();
+        actionbarHandler.start();
+        Bukkit.getPluginManager().registerEvents(equipHandler, this);
     }
 }

@@ -1,48 +1,83 @@
 package com.petrol.GlitchSMP;
 
 import com.petrol.GlitchSMP.utils.AbilityAttributes;
+import com.petrol.GlitchSMP.utils.ItemAttributes;
 import org.bukkit.plugin.Plugin;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * Central registry for glitch definitions, items, and abilities.
- */
 public class Registry {
+    private void registerGlitches() {
+        // registerGlitch("example_glitch",
+        //         new ExampleItemAttributes(plugin),
+        //         new ExampleAbilityAttributes());
+        // registerGlitch("freeze", new FreezeItemAttributes(plugin), new FreezeAbility());
+        // registerGlitch("dash", new DashItemAttributes(plugin), new DashAbility());
+        // ...add real glitches here...
+    }
+
+    // ----------------------------------------------------------------------------------------|
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    // DO NOT modify below unless you know what you're doing.                                  |
+    // Registry internals handle storage, lookups, and helpers for commands/equip UI.          |
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    // ----------------------------------------------------------------------------------------|
+
+
+    private static Registry instance;
     private final Plugin plugin;
-    private final Map<String, GlitchItem<? extends AbilityAttributes>> items = new HashMap<>();
+    private final Map<String, ItemAttributes> items = new HashMap<>();
     private final Map<String, AbilityAttributes> abilities = new HashMap<>();
 
-    public Registry(Plugin plugin) {
+    private Registry(Plugin plugin) {
         this.plugin = plugin;
+    }
+
+    public static Registry initialize(Plugin plugin) {
+        instance = new Registry(plugin);
+        instance.registerGlitches();
+        return instance;
+    }
+
+    public static Registry get() {
+        return instance;
     }
 
     public Plugin getPlugin() {
         return plugin;
     }
-
-    public void bootstrap() {
-        // TODO hook into automatic registration or config-driven loading.
+    public void registerGlitch(String id, ItemAttributes itemAttributes, AbilityAttributes abilityAttributes) {
+        String key = id.toLowerCase(Locale.ROOT);
+        items.put(key, itemAttributes);
+        abilities.put(key, abilityAttributes);
     }
 
-    public void registerItem(GlitchItem<? extends AbilityAttributes> item) {
-        items.put(item.getId(), item);
-        abilities.put(item.getId(), item.getAbility());
-    }
-
-    public Optional<GlitchItem<? extends AbilityAttributes>> getItem(String id) {
-        return Optional.ofNullable(items.get(id.toLowerCase()));
+    public Optional<ItemAttributes> getItem(String id) {
+        return Optional.ofNullable(items.get(id.toLowerCase(Locale.ROOT)));
     }
 
     public Optional<AbilityAttributes> getAbility(String id) {
-        return Optional.ofNullable(abilities.get(id.toLowerCase()));
+        return Optional.ofNullable(abilities.get(id.toLowerCase(Locale.ROOT)));
     }
 
-    public Collection<GlitchItem<? extends AbilityAttributes>> getAllItems() {
+    public Collection<ItemAttributes> getAllItems() {
         return Collections.unmodifiableCollection(items.values());
     }
 

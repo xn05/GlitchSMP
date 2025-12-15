@@ -55,6 +55,7 @@ public interface ItemAttributes {
             meta.setLore(Collections.unmodifiableList(getLore()));
             meta.setCustomModelData(getCustomModelData());
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
+            meta.setLocalizedName(getKey().getKey());
             stack.setItemMeta(meta);
         }
         return stack;
