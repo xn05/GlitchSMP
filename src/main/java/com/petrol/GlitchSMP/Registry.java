@@ -22,6 +22,15 @@ public class Registry {
         registerGlitch("dream",
                 new com.petrol.GlitchSMP.items.DreamGlitchItem(plugin),
                 new com.petrol.GlitchSMP.glitches.DreamGlitchAbility());
+        registerGlitch("freeze",
+                new com.petrol.GlitchSMP.items.FreezeGlitchItem(plugin),
+                new com.petrol.GlitchSMP.glitches.FreezeGlitchAbility());
+        registerGlitch("bedrock",
+                new com.petrol.GlitchSMP.items.BedrockGlitchItem(plugin),
+                new com.petrol.GlitchSMP.glitches.BedrockGlitchAbility());
+        registerGlitch("immortality",
+                new com.petrol.GlitchSMP.items.ImmortalityGlitchItem(plugin),
+                new com.petrol.GlitchSMP.glitches.ImmortalityGlitchAbility());
         // ...add real glitches here...
     }
 

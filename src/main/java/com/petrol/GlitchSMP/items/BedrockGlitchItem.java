@@ -7,34 +7,32 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.List;
 
-public class RedstoneGlitchItem implements ItemAttributes {
+public class BedrockGlitchItem implements ItemAttributes {
     private final Plugin plugin;
     private final NamespacedKey key;
 
-    public RedstoneGlitchItem(Plugin plugin) {
+    public BedrockGlitchItem(Plugin plugin) {
         this.plugin = plugin;
-        this.key = new NamespacedKey(plugin, "redstone_glitch");
+        this.key = new NamespacedKey(plugin, "bedrock_glitch");
     }
 
     @Override
     public String getId() {
-        return "redstone";
+        return "bedrock";
     }
 
     @Override
     public String getDisplayName() {
-        return "§cRedstone Glitch";
+        return "§fBedrock Glitch";
     }
 
     @Override
     public List<String> getLore() {
         return List.of(
-                "§72.5m Cooldown",
+                "§72m Cooldown",
                 "",
-                "§fFor each redstone block in your inventory,",
-                "§fyou gain 1 redstone point. When activated,",
-                "§fattack damage dealt is increased by",
-                "§fyour total redstone points divided by 100."
+                "§fFor 15 seconds, all blocks you place",
+                "§fbecome unbreakable."
         );
     }
 
@@ -45,7 +43,12 @@ public class RedstoneGlitchItem implements ItemAttributes {
 
     @Override
     public int getCustomModelData() {
-        return 4;
+        return 14;
+    }
+
+    @Override
+    public String getGlyph() {
+        return "";
     }
 
     @Override
@@ -53,4 +56,3 @@ public class RedstoneGlitchItem implements ItemAttributes {
         return key;
     }
 }
-

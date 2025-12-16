@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -273,6 +274,29 @@ public class AbilityHandler implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         equipped.remove(event.getPlayer().getUniqueId());
+    }
+
+    @EventHandler
+    public void onDeath(PlayerDeathEvent event) {
+        Player player = event.getEntity();
+        EnumMap<Slot, String> slots = equipped.get(player.getUniqueId());
+        if (slots != null) {
+            for (String id : slots.values()) {
+                if (id != null) {
+                    registry.getItem(id).ifPresent(item -> {
+                        org.bukkit.inventory.ItemStack itemStack = new org.bukkit.inventory.ItemStack(item.getMaterial());
+                        org.bukkit.inventory.meta.ItemMeta meta = itemStack.getItemMeta();
+                        if (meta != null) {
+                            meta.setDisplayName(item.getDisplayName());
+                            meta.setLore(item.getLore());
+                            meta.setCustomModelData(item.getCustomModelData());
+                            itemStack.setItemMeta(meta);
+                        }
+                        event.getDrops().add(itemStack);
+                    });
+                }
+            }
+        }
     }
 
     public void fireCustomEvent(String eventId, Player player, Object payload) {

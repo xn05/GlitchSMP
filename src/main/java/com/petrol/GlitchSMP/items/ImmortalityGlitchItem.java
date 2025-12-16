@@ -7,34 +7,32 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.List;
 
-public class RedstoneGlitchItem implements ItemAttributes {
+public class ImmortalityGlitchItem implements ItemAttributes {
     private final Plugin plugin;
     private final NamespacedKey key;
 
-    public RedstoneGlitchItem(Plugin plugin) {
+    public ImmortalityGlitchItem(Plugin plugin) {
         this.plugin = plugin;
-        this.key = new NamespacedKey(plugin, "redstone_glitch");
+        this.key = new NamespacedKey(plugin, "immortality_glitch");
     }
 
     @Override
     public String getId() {
-        return "redstone";
+        return "immortality";
     }
 
     @Override
     public String getDisplayName() {
-        return "§cRedstone Glitch";
+        return "§6Immortality Glitch";
     }
 
     @Override
     public List<String> getLore() {
         return List.of(
-                "§72.5m Cooldown",
+                "§75m Cooldown",
                 "",
-                "§fFor each redstone block in your inventory,",
-                "§fyou gain 1 redstone point. When activated,",
-                "§fattack damage dealt is increased by",
-                "§fyour total redstone points divided by 100."
+                "§fBecome immortal for 30 seconds,",
+                "§ftaking no damage from any source."
         );
     }
 
@@ -45,7 +43,12 @@ public class RedstoneGlitchItem implements ItemAttributes {
 
     @Override
     public int getCustomModelData() {
-        return 4;
+        return 19;
+    }
+
+    @Override
+    public String getGlyph() {
+        return "";
     }
 
     @Override
@@ -53,4 +56,3 @@ public class RedstoneGlitchItem implements ItemAttributes {
         return key;
     }
 }
-
