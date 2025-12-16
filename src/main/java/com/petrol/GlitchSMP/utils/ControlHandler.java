@@ -14,36 +14,32 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ControlHandler implements Listener {
     public enum ActivationAction {
-        RIGHT,
-        LEFT,
-        SHIFT_RIGHT,
-        SHIFT_LEFT,
-        OFFHAND,
-        MOVE,
-        SNEAK;
+         SHIFT_RIGHT,
+         SHIFT_LEFT,
+         OFFHAND;
 
-        public static ActivationAction fromString(String raw) {
-            if (raw == null || raw.isEmpty()) {
-                return null;
-            }
-            try {
-                return ActivationAction.valueOf(raw.toUpperCase(Locale.ROOT));
-            } catch (IllegalArgumentException ex) {
-                return null;
-            }
-        }
+         public static ActivationAction fromString(String raw) {
+             if (raw == null || raw.isEmpty()) {
+                 return null;
+             }
+             try {
+                 return ActivationAction.valueOf(raw.toUpperCase(Locale.ROOT));
+             } catch (IllegalArgumentException ex) {
+                 return null;
+             }
+         }
 
-        public static String displayList() {
-            StringBuilder builder = new StringBuilder();
-            ActivationAction[] values = values();
-            for (int i = 0; i < values.length; i++) {
-                builder.append(values[i].name().toLowerCase(Locale.ROOT));
-                if (i < values.length - 1) {
-                    builder.append(", ");
-                }
-            }
-            return builder.toString();
-        }
+         public static String displayList() {
+             StringBuilder builder = new StringBuilder();
+             ActivationAction[] values = values();
+             for (int i = 0; i < values.length; i++) {
+                 builder.append(values[i].name().toLowerCase(Locale.ROOT));
+                 if (i < values.length - 1) {
+                     builder.append(", ");
+                 }
+             }
+             return builder.toString();
+         }
     }
 
     private final DataHandler dataHandler;
@@ -89,7 +85,7 @@ public class ControlHandler implements Listener {
     }
 
     private ActivationAction defaultAction(AbilityHandler.Slot slot) {
-        return slot == AbilityHandler.Slot.PRIMARY ? ActivationAction.RIGHT : ActivationAction.SHIFT_RIGHT;
+        return ActivationAction.SHIFT_RIGHT;
     }
 
     @EventHandler

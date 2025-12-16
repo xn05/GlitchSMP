@@ -5,6 +5,7 @@ import com.petrol.GlitchSMP.utils.ActionbarHandler;
 import com.petrol.GlitchSMP.utils.CommandHandler;
 import com.petrol.GlitchSMP.utils.EquipHandler;
 import com.petrol.GlitchSMP.utils.DataHandler;
+import com.petrol.GlitchSMP.utils.ControlHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
 import org.bukkit.permissions.Permission;
@@ -21,6 +22,8 @@ public final class GlitchSMP extends JavaPlugin {
     private ActionbarHandler actionbarHandler;
     private EquipHandler equipHandler;
     private DataHandler dataHandler;
+    private ControlHandler controlHandler;
+    private GuiProtectionListener guiProtectionListener;
 
     @Override
     public void onEnable() {
@@ -28,7 +31,10 @@ public final class GlitchSMP extends JavaPlugin {
         dataHandler = new DataHandler(this);
         dataHandler.load();
 
-        abilityHandler = new AbilityHandler(this, registry, dataHandler);
+        controlHandler = new ControlHandler(dataHandler);
+        Bukkit.getPluginManager().registerEvents(controlHandler, this);
+
+        abilityHandler = new AbilityHandler(this, registry, dataHandler, controlHandler);
         actionbarHandler = new ActionbarHandler(this, abilityHandler, registry);
         equipHandler = new EquipHandler(registry, abilityHandler);
 
@@ -38,8 +44,10 @@ public final class GlitchSMP extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(equipHandler, this);
         registerDefaultPermissions();
 
-        CommandHandler commandHandler = new CommandHandler(this, registry, abilityHandler, dataHandler);
+        CommandHandler commandHandler = new CommandHandler(this, registry, abilityHandler, controlHandler);
         registerCommand(new GlitchCommand(commandHandler));
+        guiProtectionListener = new GuiProtectionListener(commandHandler);
+        Bukkit.getPluginManager().registerEvents(guiProtectionListener, this);
     }
 
     @Override
@@ -54,6 +62,8 @@ public final class GlitchSMP extends JavaPlugin {
             dataHandler.save();
         }
         registry = null;
+        controlHandler = null;
+        guiProtectionListener = null;
     }
 
     public void reloadGlitchPlugin() {
@@ -66,23 +76,34 @@ public final class GlitchSMP extends JavaPlugin {
         if (dataHandler != null) {
             dataHandler.save();
         }
-        if (registry != null) {
-            registry = null;
-        }
+        registry = null;
+        actionbarHandler = null;
+        abilityHandler = null;
+        equipHandler = null;
+
         if (dataHandler == null) {
             dataHandler = new DataHandler(this);
             dataHandler.load();
         } else {
             dataHandler.reload();
         }
+
         registry = Registry.initialize(this);
-        abilityHandler = new AbilityHandler(this, registry, dataHandler);
+        controlHandler = new ControlHandler(dataHandler);
+        Bukkit.getPluginManager().registerEvents(controlHandler, this);
+
+        abilityHandler = new AbilityHandler(this, registry, dataHandler, controlHandler);
         actionbarHandler = new ActionbarHandler(this, abilityHandler, registry);
         equipHandler = new EquipHandler(registry, abilityHandler);
         abilityHandler.start();
         abilityHandler.loadOnlinePlayers();
         actionbarHandler.start();
         Bukkit.getPluginManager().registerEvents(equipHandler, this);
+
+        CommandHandler commandHandler = new CommandHandler(this, registry, abilityHandler, controlHandler);
+        registerCommand(new GlitchCommand(commandHandler));
+        guiProtectionListener = new GuiProtectionListener(commandHandler);
+        Bukkit.getPluginManager().registerEvents(guiProtectionListener, this);
     }
 
     private void registerCommand(GlitchCommand command) {

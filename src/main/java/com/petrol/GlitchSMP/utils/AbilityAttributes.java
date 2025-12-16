@@ -55,8 +55,21 @@ public interface AbilityAttributes {
         return Stage.BASE;
     }
 
-    /** Default cooldown applied whenever a trigger consumes the ability. */
-    default long getBaseCooldownMillis() {
+    /**
+     * Base cooldown applied after a trigger consumes the ability (in milliseconds).
+     * Override this or {@link #getCooldownSeconds()} to configure how long the ability
+     * should be unusable once activated.
+     */
+    default long getCooldownMillis() {
+        long seconds = getCooldownSeconds();
+        return (seconds <= 0L) ? 0L : seconds * 1000L;
+    }
+
+    /**
+     * Convenience hook allowing ability files to specify cooldowns in seconds.
+     * Implementations may override this instead of {@link #getCooldownMillis()}.
+     */
+    default long getCooldownSeconds() {
         return 0L;
     }
 
@@ -74,23 +87,9 @@ public interface AbilityAttributes {
         return TriggerResult.none();
     }
 
-    /** Sneak + right click interaction. */
-    default TriggerResult onShiftRightClick(PlayerInteractEvent event) {
-        return TriggerResult.none();
-    }
-
-    /** Sneak + left click interaction. */
-    default TriggerResult onShiftLeftClick(PlayerInteractEvent event) {
-        return TriggerResult.none();
-    }
-
-    /** Regular right click (no sneak). */
-    default TriggerResult onRightClick(PlayerInteractEvent event) {
-        return TriggerResult.none();
-    }
-
-    /** Regular left click (no sneak). */
-    default TriggerResult onLeftClick(PlayerInteractEvent event) {
+    /** Routed activation based on the player's configured control. */
+    default TriggerResult onControlActivation(PlayerInteractEvent event, AbilityHandler.Slot slot,
+                                             ControlHandler.ActivationAction action) {
         return TriggerResult.none();
     }
 
@@ -136,17 +135,16 @@ public interface AbilityAttributes {
 
     /**
      * Catch-all hook for custom triggers (e.g., scripted trials or timeline events).
-     * @param eventId identifier defined by higher-level systems
-     * @param payload optional context object
      */
     default TriggerResult onCustomEvent(String eventId, Player player, Object payload) {
         return TriggerResult.none();
     }
 
     /**
-     * Optional activation window timer (e.g. Crash glitch arming). Return remaining millis, 0 for none.
+     * Allows an ability to keep receiving event callbacks even while its cooldown is running.
+     * Useful for glitches that create short-lived windows (e.g., Crash) that must finish resolving.
      */
-    default long getActivationWindowRemaining(org.bukkit.entity.Player player) {
-        return 0L;
+    default boolean allowWhileCooling(Player player) {
+        return false;
     }
 }

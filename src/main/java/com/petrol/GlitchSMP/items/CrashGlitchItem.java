@@ -49,7 +49,7 @@ public class CrashGlitchItem implements ItemAttributes {
 
     @Override
     public String getGlyph() {
-        return "∜"; // placeholder glyph
+        return "∜";
     }
 
     @Override

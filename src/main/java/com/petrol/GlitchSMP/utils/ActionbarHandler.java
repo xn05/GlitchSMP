@@ -7,9 +7,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 public class ActionbarHandler {
-    private static final String GLYPH_BLANK = "\uE901"; // glitch_token_g
-    private static final String GLYPH_TIMER_S = "\uE001"; // chat/icons/s
-    private static final String GLYPH_TIMER_M = "\uE002"; // chat/icons/m
+    private static final String GLYPH_BLANK = "\uE901"; // blank slot texture
+    private static final String GLYPH_TIMER_S = "\uE001"; // seconds glyph
+    private static final String GLYPH_TIMER_M = "\uE002"; // minutes glyph
+    private static final char[] SUPER_DIGITS = {'\u2070', '\u00B9', '\u00B2', '\u00B3', '\u2074', '\u2075', '\u2076', '\u2077', '\u2078', '\u2079'};
 
     private final com.petrol.GlitchSMP.GlitchSMP plugin;
     private final AbilityHandler abilityHandler;
@@ -37,28 +38,16 @@ public class ActionbarHandler {
     }
 
     private String buildBar(Player player) {
-        SlotDisplay primary = resolveSlot(player, AbilityHandler.Slot.PRIMARY);
-        SlotDisplay secondary = resolveSlot(player, AbilityHandler.Slot.SECONDARY);
-        long windowMillis = primary.windowMillis() > 0 ? primary.windowMillis() : secondary.windowMillis();
-        long timerMillis = windowMillis > 0 ? windowMillis : (primary.cooldownMillis() > 0 ? primary.cooldownMillis() : secondary.cooldownMillis());
-        String timerSegment = windowMillis > 0 ? formatWindow(windowMillis) : formatCooldown(timerMillis);
-
-        StringBuilder bar = new StringBuilder();
-        if (!timerSegment.isEmpty()) {
-            bar.append(ChatColor.AQUA).append(timerSegment).append(" ");
-        }
-        bar.append(ChatColor.WHITE).append(primary.glyph())
-                .append(ChatColor.DARK_GRAY).append(" ")
-                .append(ChatColor.WHITE).append(secondary.glyph());
-        return bar.toString().trim();
+        String primarySegment = formatSlot(resolveSlot(player, AbilityHandler.Slot.PRIMARY));
+        String secondarySegment = formatSlot(resolveSlot(player, AbilityHandler.Slot.SECONDARY));
+        return (primarySegment + ChatColor.DARK_GRAY + " " + secondarySegment).trim();
     }
 
     private SlotDisplay resolveSlot(Player player, AbilityHandler.Slot slot) {
         return abilityHandler.getEquipped(player, slot)
                 .map(ability -> new SlotDisplay(
                         resolveGlyph(ability),
-                        abilityHandler.getCooldownRemainingMillis(player, ability),
-                        abilityHandler.getActivationWindowMillis(player, ability)))
+                        abilityHandler.getCooldownRemainingMillis(player, ability)))
                 .orElse(SlotDisplay.EMPTY);
     }
 
@@ -72,25 +61,43 @@ public class ActionbarHandler {
                 });
     }
 
-    private String formatWindow(long millis) {
-        if (millis <= 0) {
-            return "";
+    private String formatSlot(SlotDisplay slot) {
+        StringBuilder sb = new StringBuilder();
+        if (slot.cooldownMillis() > 0) {
+            sb.append(ChatColor.AQUA).append(formatCooldown(slot.cooldownMillis())).append(" ");
         }
-        long seconds = (millis + 999) / 1000;
-        return "" + seconds + "\uE001"; // using the seconds glyph for urgency
+        sb.append(ChatColor.WHITE).append(slot.glyph());
+        return sb.toString();
     }
 
     private String formatCooldown(long millis) {
-        if (millis <= 0) {
-            return "";
+        long seconds = Math.max(1L, (millis + 999L) / 1000L);
+        if (seconds >= 60L) {
+            long minutes = seconds / 60L;
+            long rem = seconds % 60L;
+            if (rem == 0L) {
+                return toSuperscript(minutes) + GLYPH_TIMER_M;
+            }
+            return toSuperscript(minutes) + GLYPH_TIMER_M + ChatColor.GRAY + " " + ChatColor.AQUA + toSuperscript(rem) + GLYPH_TIMER_S;
         }
-        long totalSeconds = (millis + 999) / 1000;
-        long minutes = totalSeconds / 60;
-        long seconds = totalSeconds % 60;
-        return minutes + GLYPH_TIMER_M + " " + String.format("%02d", seconds) + GLYPH_TIMER_S;
+        return toSuperscript(seconds) + GLYPH_TIMER_S;
     }
 
-    private record SlotDisplay(String glyph, long cooldownMillis, long windowMillis) {
-        private static final SlotDisplay EMPTY = new SlotDisplay(GLYPH_BLANK, 0L, 0L);
+    private String toSuperscript(long value) {
+        if (value == 0) {
+            return String.valueOf(SUPER_DIGITS[0]);
+        }
+        StringBuilder sb = new StringBuilder();
+        long remaining = value;
+        while (remaining > 0) {
+            int digit = (int) (remaining % 10);
+            sb.insert(0, SUPER_DIGITS[digit]);
+            remaining /= 10;
+        }
+        return sb.toString();
+    }
+
+    private record SlotDisplay(String glyph, long cooldownMillis) {
+        private static final SlotDisplay EMPTY = new SlotDisplay(GLYPH_BLANK, 0L);
     }
 }

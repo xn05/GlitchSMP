@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class AbilityHandler implements Listener {
@@ -33,15 +35,16 @@ public class AbilityHandler implements Listener {
     private final com.petrol.GlitchSMP.GlitchSMP plugin;
     private final Registry registry;
     private final DataHandler dataHandler;
+    private final ControlHandler controlHandler;
     private final Map<UUID, EnumMap<Slot, String>> equipped = new HashMap<>();
     private final Map<String, Long> cooldowns = new HashMap<>();
-    private final Map<UUID, Map<String, Long>> activationWindows = new HashMap<>();
     private BukkitTask tickTask;
 
-    public AbilityHandler(com.petrol.GlitchSMP.GlitchSMP plugin, Registry registry, DataHandler dataHandler) {
+    public AbilityHandler(com.petrol.GlitchSMP.GlitchSMP plugin, Registry registry, DataHandler dataHandler, ControlHandler controlHandler) {
         this.plugin = plugin;
         this.registry = registry;
         this.dataHandler = dataHandler;
+        this.controlHandler = controlHandler;
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
@@ -140,42 +143,36 @@ public class AbilityHandler implements Listener {
             return;
         }
         if (result.startCooldown()) {
-            long cooldown = result.cooldownMillis() > 0 ? result.cooldownMillis() : ability.getBaseCooldownMillis();
-            cooldowns.put(key(player, ability), System.currentTimeMillis() + cooldown);
-        }
-        long window = ability.getActivationWindowRemaining(player);
-        if (window > 0) {
-            activationWindows.computeIfAbsent(player.getUniqueId(), id -> new HashMap<>())
-                    .put(ability.getId(), System.currentTimeMillis() + window);
+            long cooldown = result.cooldownMillis() > 0 ? result.cooldownMillis() : ability.getCooldownMillis();
+            if (cooldown <= 0) {
+                cooldown = ability.getCooldownMillis();
+            }
+            long expiresAt = System.currentTimeMillis() + Math.max(0L, cooldown);
+            cooldowns.put(key(player, ability), expiresAt);
         }
     }
 
-    public long getActivationWindowMillis(Player player, AbilityAttributes ability) {
-        Map<String, Long> map = activationWindows.get(player.getUniqueId());
-        if (map == null) {
+    public long getCooldownRemainingMillis(Player player, AbilityAttributes ability) {
+        Long expiresAt = cooldowns.get(key(player, ability));
+        if (expiresAt == null) {
             return 0L;
         }
-        Long expires = map.get(ability.getId());
-        if (expires == null) {
-            return 0L;
-        }
-        long remaining = expires - System.currentTimeMillis();
+        long remaining = expiresAt - System.currentTimeMillis();
         if (remaining <= 0) {
-            map.remove(ability.getId());
+            cooldowns.remove(key(player, ability));
             return 0L;
         }
         return remaining;
     }
 
-    public long getCooldownRemainingMillis(Player player, AbilityAttributes ability) {
-        Long expiresAt = cooldowns.get(key(player, ability));
-        long remaining = expiresAt == null ? 0L : expiresAt - System.currentTimeMillis();
-        return Math.max(0L, remaining);
-    }
-
     private boolean isOnCooldown(Player player, AbilityAttributes ability) {
         return getCooldownRemainingMillis(player, ability) > 0L;
     }
+
+    private boolean canTrigger(Player player, AbilityAttributes ability) {
+        return player != null && (!isOnCooldown(player, ability) || ability.allowWhileCooling(player));
+    }
+
 
     private String key(Player player, AbilityAttributes ability) {
         return player.getUniqueId() + ":" + ability.getId();
@@ -192,41 +189,16 @@ public class AbilityHandler implements Listener {
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
-        for (AbilityAttributes ability : getEquippedAbilities(player)) {
-            if (isOnCooldown(player, ability)) {
-                continue;
-            }
-            AbilityAttributes.TriggerResult result;
-            if (player.isSneaking()) {
-                switch (event.getAction()) {
-                    case RIGHT_CLICK_AIR:
-                    case RIGHT_CLICK_BLOCK:
-                        result = ability.onShiftRightClick(event);
-                        break;
-                    case LEFT_CLICK_AIR:
-                    case LEFT_CLICK_BLOCK:
-                        result = ability.onShiftLeftClick(event);
-                        break;
-                    default:
-                        result = AbilityAttributes.TriggerResult.none();
-                        break;
-                }
-            } else {
-                switch (event.getAction()) {
-                    case RIGHT_CLICK_AIR:
-                    case RIGHT_CLICK_BLOCK:
-                        result = ability.onRightClick(event);
-                        break;
-                    case LEFT_CLICK_AIR:
-                    case LEFT_CLICK_BLOCK:
-                        result = ability.onLeftClick(event);
-                        break;
-                    default:
-                        result = AbilityAttributes.TriggerResult.none();
-                        break;
-                }
-            }
-            fire(player, ability, result);
+        if (!player.isSneaking()) {
+            return;
+        }
+        ControlHandler.ActivationAction action = switch (event.getAction()) {
+            case RIGHT_CLICK_AIR, RIGHT_CLICK_BLOCK -> ControlHandler.ActivationAction.SHIFT_RIGHT;
+            case LEFT_CLICK_AIR, LEFT_CLICK_BLOCK -> ControlHandler.ActivationAction.SHIFT_LEFT;
+            default -> null;
+        };
+        if (action != null) {
+            resolveAndActivate(player, action, event);
         }
     }
 
@@ -234,14 +206,14 @@ public class AbilityHandler implements Listener {
     public void onEntityHit(EntityDamageByEntityEvent event) {
         if (event.getDamager() instanceof Player damager) {
             for (AbilityAttributes ability : getEquippedAbilities(damager)) {
-                if (!isOnCooldown(damager, ability)) {
+                if (canTrigger(damager, ability)) {
                     fire(damager, ability, ability.onEntityHit(event));
                 }
             }
         }
         if (event.getEntity() instanceof Player target) {
             for (AbilityAttributes ability : getEquippedAbilities(target)) {
-                if (!isOnCooldown(target, ability)) {
+                if (canTrigger(target, ability)) {
                     fire(target, ability, ability.onEntityDamaged(event));
                 }
             }
@@ -253,11 +225,7 @@ public class AbilityHandler implements Listener {
         if (!event.getPlayer().isSneaking()) {
             return;
         }
-        for (AbilityAttributes ability : getEquippedAbilities(event.getPlayer())) {
-            if (!isOnCooldown(event.getPlayer(), ability)) {
-                fire(event.getPlayer(), ability, ability.onOffhandSwap(event));
-            }
-        }
+        handleActivation(event.getPlayer(), ControlHandler.ActivationAction.OFFHAND, ability -> ability.onOffhandSwap(event));
     }
 
     @EventHandler
@@ -266,7 +234,7 @@ public class AbilityHandler implements Listener {
             return;
         }
         for (AbilityAttributes ability : getEquippedAbilities(player)) {
-            if (!isOnCooldown(player, ability)) {
+            if (canTrigger(player, ability)) {
                 fire(player, ability, ability.onProjectileLaunch(event));
             }
         }
@@ -278,28 +246,8 @@ public class AbilityHandler implements Listener {
             return;
         }
         for (AbilityAttributes ability : getEquippedAbilities(player)) {
-            if (!isOnCooldown(player, ability)) {
+            if (canTrigger(player, ability)) {
                 fire(player, ability, ability.onProjectileHit(event));
-            }
-        }
-    }
-
-    @EventHandler
-    public void onPlayerMove(PlayerMoveEvent event) {
-        Player player = event.getPlayer();
-        for (AbilityAttributes ability : getEquippedAbilities(player)) {
-            if (!isOnCooldown(player, ability)) {
-                fire(player, ability, ability.onPlayerMove(event));
-            }
-        }
-    }
-
-    @EventHandler
-    public void onSneak(PlayerToggleSneakEvent event) {
-        Player player = event.getPlayer();
-        for (AbilityAttributes ability : getEquippedAbilities(player)) {
-            if (!isOnCooldown(player, ability)) {
-                fire(player, ability, ability.onSneakToggle(event));
             }
         }
     }
@@ -310,7 +258,7 @@ public class AbilityHandler implements Listener {
             return;
         }
         for (AbilityAttributes ability : getEquippedAbilities(player)) {
-            if (!isOnCooldown(player, ability)) {
+            if (canTrigger(player, ability)) {
                 fire(player, ability, ability.onInventoryClick(event));
             }
         }
@@ -328,9 +276,10 @@ public class AbilityHandler implements Listener {
 
     public void fireCustomEvent(String eventId, Player player, Object payload) {
         for (AbilityAttributes ability : getEquippedAbilities(player)) {
-            if (!isOnCooldown(player, ability)) {
-                fire(player, ability, ability.onCustomEvent(eventId, player, payload));
+            if (!canTrigger(player, ability)) {
+                continue;
             }
+            fire(player, ability, ability.onCustomEvent(eventId, player, payload));
         }
     }
 
@@ -341,6 +290,7 @@ public class AbilityHandler implements Listener {
     }
 
     private void hydratePlayer(Player player) {
+        controlHandler.hydrate(player);
         EnumMap<Slot, String> slots = equipped.computeIfAbsent(player.getUniqueId(), k -> new EnumMap<>(Slot.class));
         for (Slot slot : Slot.values()) {
             dataHandler.getEquipped(player.getUniqueId(), slot).ifPresentOrElse(id -> {
@@ -349,4 +299,58 @@ public class AbilityHandler implements Listener {
             }, () -> slots.remove(slot));
         }
     }
+
+    private void handleActivation(Player player, ControlHandler.ActivationAction action,
+                                  Function<AbilityAttributes, AbilityAttributes.TriggerResult> executor) {
+        for (Slot slot : Slot.values()) {
+            if (!controlHandler.matches(player, slot, action)) {
+                continue;
+            }
+            Optional<AbilityAttributes> abilityOpt = getEquipped(player, slot);
+            if (abilityOpt.isEmpty()) {
+                continue;
+            }
+            AbilityAttributes ability = abilityOpt.get();
+            if (!canTrigger(player, ability)) {
+                continue;
+            }
+            AbilityAttributes.TriggerResult result = executor.apply(ability);
+            fire(player, ability, result);
+        }
+    }
+
+    private void triggerSlot(Player player, Slot slot, ControlHandler.ActivationAction action,
+                             java.util.function.BiFunction<AbilityAttributes, Slot, AbilityAttributes.TriggerResult> executor) {
+        Optional<AbilityAttributes> abilityOpt = getEquipped(player, slot);
+        if (abilityOpt.isEmpty()) {
+            return;
+        }
+        AbilityAttributes ability = abilityOpt.get();
+        if (!canTrigger(player, ability)) {
+            return;
+        }
+        AbilityAttributes.TriggerResult result = executor.apply(ability, slot);
+        fire(player, ability, result);
+    }
+
+    private void resolveAndActivate(Player player, ControlHandler.ActivationAction action, PlayerInteractEvent event) {
+        for (Slot slot : Slot.values()) {
+            if (!controlHandler.matches(player, slot, action)) {
+                continue;
+            }
+            triggerSlot(player, slot, action, (ability, matchedSlot) ->
+                    ability.onControlActivation(event, matchedSlot, action));
+        }
+    }
+
+    private void resolveAndActivate(Player player, ControlHandler.ActivationAction action,
+                                    java.util.function.Function<AbilityAttributes, AbilityAttributes.TriggerResult> executor) {
+        for (Slot slot : Slot.values()) {
+            if (!controlHandler.matches(player, slot, action)) {
+                continue;
+            }
+            triggerSlot(player, slot, action, (ability, __) -> executor.apply(ability));
+        }
+    }
 }
+

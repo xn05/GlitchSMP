@@ -23,25 +23,27 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class CommandHandler implements CommandExecutor, TabCompleter {
     private static final int GUI_ROWS = 5;
     private static final int GUI_SIZE = GUI_ROWS * 9;
-    private static final List<String> SETTINGS_ACTIONS = List.of(
-            "RIGHT", "LEFT", "SHIFT_RIGHT", "SHIFT_LEFT", "OFFHAND", "MOVE", "SNEAK"
-    );
-    private static final Set<String> SETTINGS_LOOKUP = new HashSet<>(SETTINGS_ACTIONS);
+    public static final String GUI_TITLE = ChatColor.DARK_GRAY + "Glitches";
+    private static final List<String> SETTINGS_ACTIONS = List.of("shift_left", "shift_right", "offhand");
+    private static final Set<String> SETTINGS_LOOKUP = SETTINGS_ACTIONS.stream()
+            .map(String::toUpperCase)
+            .collect(Collectors.toSet());
 
     private final GlitchSMP plugin;
     private final Registry registry;
     private final AbilityHandler abilityHandler;
-    private final DataHandler dataHandler;
+    private final ControlHandler controlHandler;
 
-    public CommandHandler(GlitchSMP plugin, Registry registry, AbilityHandler abilityHandler, DataHandler dataHandler) {
+    public CommandHandler(GlitchSMP plugin, Registry registry, AbilityHandler abilityHandler, ControlHandler controlHandler) {
         this.plugin = plugin;
         this.registry = registry;
         this.abilityHandler = abilityHandler;
-        this.dataHandler = dataHandler;
+        this.controlHandler = controlHandler;
     }
 
     @Override
@@ -108,7 +110,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             sender.sendMessage(ChatColor.RED + "No permission.");
             return true;
         }
-        Inventory gui = Bukkit.createInventory(player, GUI_SIZE, ChatColor.DARK_GRAY + "Glitches");
+        Inventory gui = Bukkit.createInventory(player, GUI_SIZE, GUI_TITLE);
         ItemStack filler = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta meta = filler.getItemMeta();
         if (meta != null) {
@@ -230,11 +232,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         }
         String action = args[2].toUpperCase(Locale.ROOT);
         if (!SETTINGS_LOOKUP.contains(action)) {
-            sender.sendMessage(ChatColor.RED + "Unknown activation. Options: " + SETTINGS_ACTIONS);
+            sender.sendMessage(ChatColor.RED + "Unknown activation. Options: " + String.join(", ", SETTINGS_ACTIONS));
             return true;
         }
-        player.sendMessage(ChatColor.GRAY + "Set activation for " + args[1] + " to " + action);
-        dataHandler.setActivation(player.getUniqueId(), slot, action);
+        ControlHandler.ActivationAction activation = ControlHandler.ActivationAction.valueOf(action);
+        controlHandler.setActivation(player.getUniqueId(), slot, activation);
+        player.sendMessage(ChatColor.GRAY + "Set activation for " + args[1] + " to " + activation.name().toLowerCase(Locale.ROOT));
         return true;
     }
 
@@ -244,7 +247,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         sender.sendMessage(ChatColor.GRAY + "/glitch glitches - view all glitches");
         sender.sendMessage(ChatColor.GRAY + "/glitch equip <slot> <id> - equip a glitch");
         sender.sendMessage(ChatColor.GRAY + "/glitch unequip <slot> - remove a glitch");
-        sender.sendMessage(ChatColor.GRAY + "/glitch settings <slot> <action> - configure activation");
+        sender.sendMessage(ChatColor.GRAY + "/glitch settings <slot> <action> - configure activation (shift_left, shift_right, offhand)");
         if (admin) {
             sender.sendMessage(ChatColor.GOLD + "Admin Commands:");
             sender.sendMessage(ChatColor.GOLD + "/glitch give <player> <id>");
