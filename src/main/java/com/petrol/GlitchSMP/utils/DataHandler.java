@@ -76,7 +76,10 @@ public class DataHandler {
 
     public void setActivation(UUID uuid, AbilityHandler.Slot slot, String action) {
         ensureConfig();
-        config.set(activationPath(uuid, slot), action == null ? null : action.toUpperCase(Locale.ROOT));
+        // clear the existing activation node before writing to guarantee we overwrite old data
+        String root = "players." + uuid + ".activation." + (slot == AbilityHandler.Slot.PRIMARY ? "primary" : "secondary");
+        config.set(root, null);
+        config.set(root, action == null ? null : action.toUpperCase(Locale.ROOT));
         save();
     }
 
