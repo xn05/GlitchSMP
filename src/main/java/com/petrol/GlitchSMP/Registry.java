@@ -19,6 +19,9 @@ public class Registry {
         registerGlitch("redstone",
                 new com.petrol.GlitchSMP.items.RedstoneGlitchItem(plugin),
                 new com.petrol.GlitchSMP.glitches.RedstoneGlitchAbility());
+        registerGlitch("dream",
+                new com.petrol.GlitchSMP.items.DreamGlitchItem(plugin),
+                new com.petrol.GlitchSMP.glitches.DreamGlitchAbility());
         // ...add real glitches here...
     }
 

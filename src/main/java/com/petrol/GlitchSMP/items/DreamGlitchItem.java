@@ -7,33 +7,33 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.List;
 
-public class CrashGlitchItem implements ItemAttributes {
+public class DreamGlitchItem implements ItemAttributes {
     private final Plugin plugin;
     private final NamespacedKey key;
 
-    public CrashGlitchItem(Plugin plugin) {
+    public DreamGlitchItem(Plugin plugin) {
         this.plugin = plugin;
-        this.key = new NamespacedKey(plugin, "crash_glitch");
+        this.key = new NamespacedKey(plugin, "dream_glitch");
     }
 
     @Override
     public String getId() {
-        return "crash";
+        return "dream";
     }
 
     @Override
     public String getDisplayName() {
-        return "§dCrash Glitch";
+        return "§aDream Glitch";
     }
 
     @Override
     public List<String> getLore() {
         return List.of(
-                "§72m Cooldown",
+                "§75m Cooldown",
                 "",
-                "§fWhen activated, your next hit within",
-                "§f15 seconds will crash the target's game,",
-                "§fbanning them for 15 seconds."
+                "§fWhen active, mobs drop 20x loot",
+                "§ffor 2 minutes. Mobs holding shulkers",
+                "§fwill not drop multiple shulkers."
         );
     }
 
@@ -44,12 +44,12 @@ public class CrashGlitchItem implements ItemAttributes {
 
     @Override
     public int getCustomModelData() {
-        return 24;
+        return 25;
     }
 
     @Override
     public String getGlyph() {
-        return "∜";
+        return "∛";
     }
 
     @Override

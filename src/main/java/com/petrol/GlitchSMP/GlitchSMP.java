@@ -131,4 +131,8 @@ public final class GlitchSMP extends JavaPlugin {
             }
         }
     }
+
+    public AbilityHandler getAbilityHandler() {
+        return abilityHandler;
+    }
 }

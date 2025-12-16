@@ -2,6 +2,7 @@ package com.petrol.GlitchSMP.utils;
 
 import com.petrol.GlitchSMP.Registry;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -353,4 +354,3 @@ public class AbilityHandler implements Listener {
         }
     }
 }
-

@@ -12,15 +12,9 @@ import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.inventory.EntityEquipment;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
-import org.bukkit.enchantments.Enchantment;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -69,7 +63,8 @@ public class RedstoneGlitchAbility implements AbilityAttributes {
         long expiry = System.currentTimeMillis() + DURATION_MILLIS;
         activeUntil.put(player.getUniqueId(), expiry);
         showBossBar(player, expiry);
-        player.sendMessage(ChatColor.AQUA + "Redstone Glitch activated for 30 seconds!");
+        int redstoneLevel = countRedstoneBlocks(player);
+        player.sendMessage(ChatColor.AQUA + "Redstone Glitch activated for 30 seconds! Redstone Level: " + redstoneLevel);
         return TriggerResult.consume(getCooldownMillis());
     }
 
@@ -80,12 +75,6 @@ public class RedstoneGlitchAbility implements AbilityAttributes {
             return TriggerResult.none();
         }
         double extra = computeExtraDamage(player);
-        if (extra <= 0) {
-            return TriggerResult.none();
-        }
-        if (event.getEntity() instanceof LivingEntity target) {
-            extra = applyVanillaMitigation(target, event, extra);
-        }
         if (extra <= 0) {
             return TriggerResult.none();
         }
@@ -162,43 +151,6 @@ public class RedstoneGlitchAbility implements AbilityAttributes {
     private double computeExtraDamage(Player player) {
         int power = countRedstoneBlocks(player);
         return Math.max(0, power) / 100.0;
-    }
-
-    private double applyVanillaMitigation(LivingEntity target, EntityDamageByEntityEvent event, double damage) {
-        if (damage <= 0) {
-            return 0;
-        }
-        double armor = getAttributeValue(target, Attribute.ARMOR);
-        double toughness = getAttributeValue(target, Attribute.ARMOR_TOUGHNESS);
-        double armorFactor = Math.min(20.0, Math.max(armor / 5.0, armor - damage / (2.0 + toughness / 4.0))) / 25.0;
-        double afterArmor = damage * (1.0 - armorFactor);
-        boolean projectile = event.getDamager() instanceof Projectile;
-        int protectionPoints = computeProtectionPoints(target, projectile);
-        double enchantFactor = Math.min(20, protectionPoints) / 25.0;
-        return afterArmor * (1.0 - enchantFactor);
-    }
-
-    private double getAttributeValue(LivingEntity entity, Attribute attribute) {
-        AttributeInstance instance = entity.getAttribute(attribute);
-        return instance != null ? instance.getValue() : 0.0;
-    }
-
-    private int computeProtectionPoints(LivingEntity target, boolean projectileDamage) {
-        EntityEquipment equipment = target.getEquipment();
-        if (equipment == null) {
-            return 0;
-        }
-        int total = 0;
-        for (ItemStack piece : equipment.getArmorContents()) {
-            if (piece == null) {
-                continue;
-            }
-            total += piece.getEnchantmentLevel(Enchantment.PROTECTION);
-            if (projectileDamage) {
-                total += piece.getEnchantmentLevel(Enchantment.PROJECTILE_PROTECTION) * 2;
-            }
-        }
-        return total;
     }
 
     private int countRedstoneBlocks(Player player) {
