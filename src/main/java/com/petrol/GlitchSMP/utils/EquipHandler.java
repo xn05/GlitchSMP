@@ -1,14 +1,15 @@
 package com.petrol.GlitchSMP.utils;
 
 import com.petrol.GlitchSMP.Registry;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Locale;
 import java.util.Optional;
 
 public class EquipHandler implements Listener {
@@ -25,25 +26,41 @@ public class EquipHandler implements Listener {
         if (event.getHand() != EquipmentSlot.HAND) {
             return;
         }
-        ItemStack item = event.getItem();
-        if (item == null) {
+        Action action = event.getAction();
+        if (action != Action.RIGHT_CLICK_AIR && action != Action.RIGHT_CLICK_BLOCK) {
             return;
         }
-        getGlitchFromItem(item).ifPresent(glitchItem -> {
+        ItemStack item = event.getItem();
+        if (item == null || !item.hasItemMeta()) {
+            return;
+        }
+        findGlitchId(item).ifPresent(glitchId -> {
             Player player = event.getPlayer();
-            abilityHandler.equip(player, glitchItem.getId());
-            player.sendMessage("Equipped " + glitchItem.getAbility().getDisplayName());
-            event.setCancelled(true);
+            AbilityHandler.Slot slot = player.isSneaking() ? AbilityHandler.Slot.SECONDARY : AbilityHandler.Slot.PRIMARY;
+            registry.getAbility(glitchId).ifPresent(ability -> {
+                registry.getItem(glitchId).ifPresent(attrs -> {
+                    ItemStack asStack = attrs.createItemStack();
+                    if (!player.getInventory().containsAtLeast(asStack, 1)) {
+                        return;
+                    }
+                    player.getInventory().removeItem(asStack);
+                });
+                abilityHandler.equip(player, slot, glitchId);
+                player.sendMessage("Equipped " + ability.getDisplayName() + " in " + (slot == AbilityHandler.Slot.PRIMARY ? "slot1" : "slot2"));
+                event.setCancelled(true);
+            });
         });
     }
 
-    private Optional<GlitchItem<?>> getGlitchFromItem(ItemStack item) {
-        for (GlitchItem<? extends AbilityAttributes> glitchItem : registry.getAllItems()) {
-            NamespacedKey key = glitchItem.getKey();
-            if (item.hasItemMeta() && item.getItemMeta().getLocalizedName().equalsIgnoreCase(key.getKey())) {
-                return Optional.of(glitchItem);
-            }
+    private Optional<String> findGlitchId(ItemStack item) {
+        String localized = item.getItemMeta().getLocalizedName();
+        if (localized == null || localized.isEmpty()) {
+            return Optional.empty();
         }
-        return Optional.empty();
+        String normalized = localized.toLowerCase(Locale.ROOT);
+        return registry.getAllItems().stream()
+                .filter(attrs -> attrs.getKey().getKey().equalsIgnoreCase(normalized))
+                .map(ItemAttributes::getId)
+                .findFirst();
     }
 }

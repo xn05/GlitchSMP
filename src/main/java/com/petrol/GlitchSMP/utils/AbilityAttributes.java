@@ -21,6 +21,8 @@ public interface AbilityAttributes {
         STAGE_CALAMITY
     }
 
+    String DEFAULT_GLYPH = "\uE901";
+
     /**
      * Encapsulates the outcome of an ability trigger.
      */
@@ -39,6 +41,14 @@ public interface AbilityAttributes {
 
     /** Player-facing name for HUDs and logs. */
     String getDisplayName();
+
+    /**
+     * Unicode glyph rendered through the resource pack to represent this glitch in the actionbar HUD.
+     * Defaults to the blank slot glyph if an ability does not override it.
+     */
+    default String getGlyph() {
+        return DEFAULT_GLYPH;
+    }
 
     /** Stage grouping for menus. */
     default Stage getStage() {
@@ -131,5 +141,12 @@ public interface AbilityAttributes {
      */
     default TriggerResult onCustomEvent(String eventId, Player player, Object payload) {
         return TriggerResult.none();
+    }
+
+    /**
+     * Optional activation window timer (e.g. Crash glitch arming). Return remaining millis, 0 for none.
+     */
+    default long getActivationWindowRemaining(org.bukkit.entity.Player player) {
+        return 0L;
     }
 }

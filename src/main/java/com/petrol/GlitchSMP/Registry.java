@@ -13,11 +13,9 @@ import java.util.Optional;
 
 public class Registry {
     private void registerGlitches() {
-        // registerGlitch("example_glitch",
-        //         new ExampleItemAttributes(plugin),
-        //         new ExampleAbilityAttributes());
-        // registerGlitch("freeze", new FreezeItemAttributes(plugin), new FreezeAbility());
-        // registerGlitch("dash", new DashItemAttributes(plugin), new DashAbility());
+        registerGlitch("crash",
+                new com.petrol.GlitchSMP.items.CrashGlitchItem(plugin),
+                new com.petrol.GlitchSMP.glitches.CrashGlitchAbility());
         // ...add real glitches here...
     }
 

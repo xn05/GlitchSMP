@@ -10,7 +10,9 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.scheduler.BukkitTask;
@@ -30,13 +32,16 @@ public class AbilityHandler implements Listener {
 
     private final com.petrol.GlitchSMP.GlitchSMP plugin;
     private final Registry registry;
+    private final DataHandler dataHandler;
     private final Map<UUID, EnumMap<Slot, String>> equipped = new HashMap<>();
     private final Map<String, Long> cooldowns = new HashMap<>();
+    private final Map<UUID, Map<String, Long>> activationWindows = new HashMap<>();
     private BukkitTask tickTask;
 
-    public AbilityHandler(com.petrol.GlitchSMP.GlitchSMP plugin, Registry registry) {
+    public AbilityHandler(com.petrol.GlitchSMP.GlitchSMP plugin, Registry registry, DataHandler dataHandler) {
         this.plugin = plugin;
         this.registry = registry;
+        this.dataHandler = dataHandler;
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
@@ -66,6 +71,7 @@ public class AbilityHandler implements Listener {
         EnumMap<Slot, String> slots = equipped.computeIfAbsent(player.getUniqueId(), k -> new EnumMap<>(Slot.class));
         Slot targetSlot = slot == null ? Slot.PRIMARY : slot;
         String previous = slots.put(targetSlot, glitchId.toLowerCase());
+        dataHandler.setEquipped(player.getUniqueId(), targetSlot, glitchId);
         registry.getAbility(glitchId).ifPresent(attr -> {
             AbilityAttributes.TriggerResult result = attr.onEquip(player);
             handleTriggerResult(player, attr, result);
@@ -81,15 +87,19 @@ public class AbilityHandler implements Listener {
             return;
         }
         if (slot == null) {
-            for (String id : slots.values()) {
-                registry.getAbility(id).ifPresent(attr -> attr.onUnequip(player));
+            for (Slot each : Slot.values()) {
+                String id = slots.remove(each);
+                if (id != null) {
+                    registry.getAbility(id).ifPresent(attr -> attr.onUnequip(player));
+                    dataHandler.setEquipped(player.getUniqueId(), each, null);
+                }
             }
-            slots.clear();
             return;
         }
         String removed = slots.remove(slot);
         if (removed != null) {
             registry.getAbility(removed).ifPresent(attr -> attr.onUnequip(player));
+            dataHandler.setEquipped(player.getUniqueId(), slot, null);
         }
     }
 
@@ -126,11 +136,35 @@ public class AbilityHandler implements Listener {
     }
 
     private void handleTriggerResult(Player player, AbilityAttributes ability, AbilityAttributes.TriggerResult result) {
-        if (result == null || !result.startCooldown()) {
+        if (result == null) {
             return;
         }
-        long cooldown = result.cooldownMillis() > 0 ? result.cooldownMillis() : ability.getBaseCooldownMillis();
-        cooldowns.put(key(player, ability), System.currentTimeMillis() + cooldown);
+        if (result.startCooldown()) {
+            long cooldown = result.cooldownMillis() > 0 ? result.cooldownMillis() : ability.getBaseCooldownMillis();
+            cooldowns.put(key(player, ability), System.currentTimeMillis() + cooldown);
+        }
+        long window = ability.getActivationWindowRemaining(player);
+        if (window > 0) {
+            activationWindows.computeIfAbsent(player.getUniqueId(), id -> new HashMap<>())
+                    .put(ability.getId(), System.currentTimeMillis() + window);
+        }
+    }
+
+    public long getActivationWindowMillis(Player player, AbilityAttributes ability) {
+        Map<String, Long> map = activationWindows.get(player.getUniqueId());
+        if (map == null) {
+            return 0L;
+        }
+        Long expires = map.get(ability.getId());
+        if (expires == null) {
+            return 0L;
+        }
+        long remaining = expires - System.currentTimeMillis();
+        if (remaining <= 0) {
+            map.remove(ability.getId());
+            return 0L;
+        }
+        return remaining;
     }
 
     public long getCooldownRemainingMillis(Player player, AbilityAttributes ability) {
@@ -282,11 +316,37 @@ public class AbilityHandler implements Listener {
         }
     }
 
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        hydratePlayer(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        equipped.remove(event.getPlayer().getUniqueId());
+    }
+
     public void fireCustomEvent(String eventId, Player player, Object payload) {
         for (AbilityAttributes ability : getEquippedAbilities(player)) {
             if (!isOnCooldown(player, ability)) {
                 fire(player, ability, ability.onCustomEvent(eventId, player, payload));
             }
+        }
+    }
+
+    public void loadOnlinePlayers() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            hydratePlayer(player);
+        }
+    }
+
+    private void hydratePlayer(Player player) {
+        EnumMap<Slot, String> slots = equipped.computeIfAbsent(player.getUniqueId(), k -> new EnumMap<>(Slot.class));
+        for (Slot slot : Slot.values()) {
+            dataHandler.getEquipped(player.getUniqueId(), slot).ifPresentOrElse(id -> {
+                slots.put(slot, id);
+                registry.getAbility(id).ifPresent(attr -> attr.onEquip(player));
+            }, () -> slots.remove(slot));
         }
     }
 }

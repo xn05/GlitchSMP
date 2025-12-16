@@ -1,6 +1,6 @@
-name: main
+name: GlitchSMP
 version: '1.0'
-main: com.petrol.GlitchSMP.main
+main: com.petrol.GlitchSMP.GlitchSMP
 api-version: '1.21'
 authors: [inceptives]
 description: Optimise all Packets for minimal ping

@@ -2,6 +2,7 @@ package com.petrol.GlitchSMP.utils;
 
 import com.petrol.GlitchSMP.GlitchSMP;
 import com.petrol.GlitchSMP.Registry;
+import com.petrol.GlitchSMP.utils.AbilityHandler.Slot;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -34,11 +35,13 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private final GlitchSMP plugin;
     private final Registry registry;
     private final AbilityHandler abilityHandler;
+    private final DataHandler dataHandler;
 
-    public CommandHandler(GlitchSMP plugin, Registry registry, AbilityHandler abilityHandler) {
+    public CommandHandler(GlitchSMP plugin, Registry registry, AbilityHandler abilityHandler, DataHandler dataHandler) {
         this.plugin = plugin;
         this.registry = registry;
         this.abilityHandler = abilityHandler;
+        this.dataHandler = dataHandler;
     }
 
     @Override
@@ -231,6 +234,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             return true;
         }
         player.sendMessage(ChatColor.GRAY + "Set activation for " + args[1] + " to " + action);
+        dataHandler.setActivation(player.getUniqueId(), slot, action);
         return true;
     }
 
