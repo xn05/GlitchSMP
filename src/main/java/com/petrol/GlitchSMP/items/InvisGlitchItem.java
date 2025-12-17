@@ -7,34 +7,31 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.List;
 
-public class VirusGlitchItem implements ItemAttributes {
+public class InvisGlitchItem implements ItemAttributes {
     private final Plugin plugin;
     private final NamespacedKey key;
 
-    public VirusGlitchItem(Plugin plugin) {
+    public InvisGlitchItem(Plugin plugin) {
         this.plugin = plugin;
-        this.key = new NamespacedKey(plugin, "virus_glitch");
+        this.key = new NamespacedKey(plugin, "invis_glitch");
     }
 
     @Override
     public String getId() {
-        return "virus";
+        return "invis";
     }
 
     @Override
     public String getDisplayName() {
-        return "§aVirus Glitch";
+        return "§7Invis Glitch";
     }
 
     @Override
     public List<String> getLore() {
         return List.of(
-                "§72m Cooldown",
+                "§74m Cooldown",
                 "",
-                "§fFor 15 seconds, the next player you hit",
-                "§fwill be infected with a virus,",
-                "§ffor 5 seconds.",
-                "§fThey wont be able to see anything."
+                "§fMakes you invisible for 30 seconds."
         );
     }
 
@@ -45,7 +42,7 @@ public class VirusGlitchItem implements ItemAttributes {
 
     @Override
     public int getCustomModelData() {
-        return 6;
+        return 26;
     }
 
     @Override

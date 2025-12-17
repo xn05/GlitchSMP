@@ -93,13 +93,14 @@ public class VirusGlitchAbility implements AbilityAttributes {
         }
         flashTitle(target);
         attacker.sendMessage(ChatColor.GREEN + "Virus applied to " + target.getName() + "!");
+        target.sendMessage(ChatColor.RED + "You have been infected with the Virus Glitch!"); // Confirm to victim
         return TriggerResult.none();
     }
 
     private void flashTitle(Player player) {
         new BukkitRunnable() {
             private int ticks = 0;
-            private final int totalTicks = 100; // 5 seconds
+            private final int totalTicks = 80; // 4 seconds
 
             @Override
             public void run() {
@@ -107,13 +108,14 @@ public class VirusGlitchAbility implements AbilityAttributes {
                     this.cancel();
                     return;
                 }
-                if (ticks % 5 == 0 && Math.random() < 0.5) { // Randomly flash
-                    player.sendTitle("", "", 0, 4, 1);
+                if (Math.random() < 0.1) { // Randomly flash (10% chance per tick)
+                    player.sendTitle("", "", 0, 20, 10); // Longer flash: stay 20 ticks (1 second), fade out 10 ticks
                 }
                 ticks++;
             }
         }.runTaskTimer(plugin, 0L, 1L);
     }
+
 
     @Override
     public TriggerResult onTick(Player player, long tick) {
@@ -144,5 +146,10 @@ public class VirusGlitchAbility implements AbilityAttributes {
         if (bar != null) {
             bar.removeAll();
         }
+    }
+
+    @Override
+    public boolean allowWhileCooling(Player player) {
+        return isActive(player);
     }
 }

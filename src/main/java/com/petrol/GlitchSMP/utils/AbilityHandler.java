@@ -17,6 +17,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.EnumMap;
@@ -294,6 +295,7 @@ public class AbilityHandler implements Listener {
                             meta.setDisplayName(item.getDisplayName());
                             meta.setLore(item.getLore());
                             meta.setCustomModelData(item.getCustomModelData());
+                            meta.getPersistentDataContainer().set(item.getKey(), PersistentDataType.STRING, item.getId());
                             itemStack.setItemMeta(meta);
                         }
                         event.getDrops().add(itemStack);

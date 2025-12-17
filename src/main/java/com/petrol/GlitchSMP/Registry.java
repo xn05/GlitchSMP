@@ -40,6 +40,12 @@ public class Registry {
         registerGlitch("virus",
                 new com.petrol.GlitchSMP.items.VirusGlitchItem(plugin),
                 new com.petrol.GlitchSMP.glitches.VirusGlitchAbility());
+        registerGlitch("horsetamer",
+                new com.petrol.GlitchSMP.items.HorsetamerGlitchItem(plugin),
+                new com.petrol.GlitchSMP.glitches.HorsetamerGlitchAbility());
+        registerGlitch("invis",
+                new com.petrol.GlitchSMP.items.InvisGlitchItem(plugin),
+                new com.petrol.GlitchSMP.glitches.InvisGlitchAbility());
         // ...add real glitches here...
     }
 

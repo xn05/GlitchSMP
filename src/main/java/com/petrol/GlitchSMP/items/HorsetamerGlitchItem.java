@@ -7,34 +7,32 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.List;
 
-public class VirusGlitchItem implements ItemAttributes {
+public class HorsetamerGlitchItem implements ItemAttributes {
     private final Plugin plugin;
     private final NamespacedKey key;
 
-    public VirusGlitchItem(Plugin plugin) {
+    public HorsetamerGlitchItem(Plugin plugin) {
         this.plugin = plugin;
-        this.key = new NamespacedKey(plugin, "virus_glitch");
+        this.key = new NamespacedKey(plugin, "horsetamer_glitch");
     }
 
     @Override
     public String getId() {
-        return "virus";
+        return "horsetamer";
     }
 
     @Override
     public String getDisplayName() {
-        return "§aVirus Glitch";
+        return "§6Horsetamer Glitch";
     }
 
     @Override
     public List<String> getLore() {
         return List.of(
-                "§72m Cooldown",
+                "§710m Cooldown",
                 "",
-                "§fFor 15 seconds, the next player you hit",
-                "§fwill be infected with a virus,",
-                "§ffor 5 seconds.",
-                "§fThey wont be able to see anything."
+                "§fSummons a skeleton horse with a saddle",
+                "§fat your location."
         );
     }
 
@@ -45,7 +43,7 @@ public class VirusGlitchItem implements ItemAttributes {
 
     @Override
     public int getCustomModelData() {
-        return 6;
+        return 11;
     }
 
     @Override
