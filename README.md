@@ -107,5 +107,5 @@ For issues or questions, open an issue on the repository or contact the maintain
 
 ---
 
-*GlitchSMP - Embrace the glitches!* 🚀</content>
+*</content>
 <parameter name="filePath">G:\My Drive\glitchsmp\README.md
