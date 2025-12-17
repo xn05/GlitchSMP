@@ -180,6 +180,10 @@ public class AbilityHandler implements Listener {
         return player.getUniqueId() + ":" + ability.getId();
     }
 
+    public void reset() {
+        cooldowns.clear();
+    }
+
     private void fire(Player player, AbilityAttributes ability, AbilityAttributes.TriggerResult result) {
         handleTriggerResult(player, ability, result);
     }
@@ -297,6 +301,8 @@ public class AbilityHandler implements Listener {
                 }
             }
         }
+        // Unequip all glitches to prevent duplication
+        unequip(player, null);
     }
 
     public void fireCustomEvent(String eventId, Player player, Object payload) {

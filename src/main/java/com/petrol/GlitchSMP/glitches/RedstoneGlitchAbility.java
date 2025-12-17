@@ -14,19 +14,25 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.event.EventHandler;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class RedstoneGlitchAbility implements AbilityAttributes {
+public class RedstoneGlitchAbility implements AbilityAttributes, Listener {
     private static final long DURATION_MILLIS = 30_000L;
     private static final long COOLDOWN_SECONDS = 150L;
 
     private final Plugin plugin = Registry.get().getPlugin();
     private final Map<UUID, Long> activeUntil = new HashMap<>();
     private final Map<UUID, BossBar> bossBars = new HashMap<>();
+
+    public RedstoneGlitchAbility() {
+        Bukkit.getPluginManager().registerEvents(this, plugin);
+    }
 
     @Override
     public String getId() {
@@ -80,6 +86,11 @@ public class RedstoneGlitchAbility implements AbilityAttributes {
         }
         event.setDamage(event.getDamage() + extra);
         return TriggerResult.none();
+    }
+
+    @EventHandler
+    public void handleEntityDamage(EntityDamageByEntityEvent event) {
+        onEntityHit(event);
     }
 
     @Override
@@ -165,5 +176,15 @@ public class RedstoneGlitchAbility implements AbilityAttributes {
             total += offhand.getAmount();
         }
         return total;
+    }
+
+    @Override
+    public void reset() {
+        // Clear all maps and remove bossbars
+        activeUntil.clear();
+        for (BossBar bar : bossBars.values()) {
+            bar.removeAll();
+        }
+        bossBars.clear();
     }
 }

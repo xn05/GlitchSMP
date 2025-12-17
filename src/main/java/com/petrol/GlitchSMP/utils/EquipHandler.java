@@ -8,6 +8,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -36,15 +37,19 @@ public class EquipHandler implements Listener {
         }
         findGlitchId(item).ifPresent(glitchId -> {
             Player player = event.getPlayer();
-            AbilityHandler.Slot slot = player.isSneaking() ? AbilityHandler.Slot.SECONDARY : AbilityHandler.Slot.PRIMARY;
+            AbilityHandler.Slot slot = determineSlot(player);
+            if (slot == null) {
+                player.sendMessage("Both slots are full!");
+                return;
+            }
             registry.getAbility(glitchId).ifPresent(ability -> {
-                registry.getItem(glitchId).ifPresent(attrs -> {
-                    ItemStack asStack = attrs.createItemStack();
-                    if (!player.getInventory().containsAtLeast(asStack, 1)) {
-                        return;
-                    }
-                    player.getInventory().removeItem(asStack);
-                });
+                // Remove the item from hand
+                item.setAmount(item.getAmount() - 1);
+                if (item.getAmount() <= 0) {
+                    player.getInventory().setItemInMainHand(null);
+                } else {
+                    player.getInventory().setItemInMainHand(item);
+                }
                 abilityHandler.equip(player, slot, glitchId);
                 player.sendMessage("Equipped " + ability.getDisplayName() + " in " + (slot == AbilityHandler.Slot.PRIMARY ? "slot1" : "slot2"));
                 event.setCancelled(true);
@@ -52,14 +57,21 @@ public class EquipHandler implements Listener {
         });
     }
 
-    private Optional<String> findGlitchId(ItemStack item) {
-        String localized = item.getItemMeta().getLocalizedName();
-        if (localized == null || localized.isEmpty()) {
-            return Optional.empty();
+    private AbilityHandler.Slot determineSlot(Player player) {
+        boolean primaryEmpty = abilityHandler.getEquipped(player, AbilityHandler.Slot.PRIMARY).isEmpty();
+        boolean secondaryEmpty = abilityHandler.getEquipped(player, AbilityHandler.Slot.SECONDARY).isEmpty();
+        if (primaryEmpty) {
+            return AbilityHandler.Slot.PRIMARY;
+        } else if (secondaryEmpty) {
+            return AbilityHandler.Slot.SECONDARY;
+        } else {
+            return null;
         }
-        String normalized = localized.toLowerCase(Locale.ROOT);
+    }
+
+    private Optional<String> findGlitchId(ItemStack item) {
         return registry.getAllItems().stream()
-                .filter(attrs -> attrs.getKey().getKey().equalsIgnoreCase(normalized))
+                .filter(attrs -> item.getItemMeta().getPersistentDataContainer().has(attrs.getKey(), PersistentDataType.STRING))
                 .map(ItemAttributes::getId)
                 .findFirst();
     }

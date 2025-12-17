@@ -8,6 +8,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Collections;
 import java.util.List;
@@ -55,7 +56,7 @@ public interface ItemAttributes {
             meta.setLore(Collections.unmodifiableList(getLore()));
             meta.setCustomModelData(getCustomModelData());
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
-            meta.setLocalizedName(getKey().getKey());
+            meta.getPersistentDataContainer().set(getKey(), PersistentDataType.STRING, getId());
             stack.setItemMeta(meta);
         }
         return stack;

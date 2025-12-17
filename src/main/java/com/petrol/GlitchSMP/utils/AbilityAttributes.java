@@ -147,4 +147,8 @@ public interface AbilityAttributes {
     default boolean allowWhileCooling(Player player) {
         return false;
     }
+
+    /** Called on plugin reload to reset all timers, bossbars, and states. */
+    default void reset() {
+    }
 }

@@ -17,6 +17,12 @@ public class GlitchCommand extends BukkitCommand {
 
     @Override
     public boolean execute(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) {
+        if (alias.equalsIgnoreCase("glitches")) {
+            if (args.length == 0) {
+                return handler.onCommand(sender, this, "glitch", new String[]{"glitches"});
+            }
+            // If args, perhaps prepend "glitches" or something, but for now, pass as is
+        }
         return handler.onCommand(sender, this, alias, args);
     }
 

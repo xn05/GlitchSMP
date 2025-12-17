@@ -1,11 +1,6 @@
 package com.petrol.GlitchSMP;
 
-import com.petrol.GlitchSMP.utils.AbilityHandler;
-import com.petrol.GlitchSMP.utils.ActionbarHandler;
-import com.petrol.GlitchSMP.utils.CommandHandler;
-import com.petrol.GlitchSMP.utils.EquipHandler;
-import com.petrol.GlitchSMP.utils.DataHandler;
-import com.petrol.GlitchSMP.utils.ControlHandler;
+import com.petrol.GlitchSMP.utils.*;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
 import org.bukkit.permissions.Permission;
@@ -75,6 +70,13 @@ public final class GlitchSMP extends JavaPlugin {
         }
         if (dataHandler != null) {
             dataHandler.save();
+        }
+        // Reset all abilities and cooldowns
+        if (registry != null) {
+            registry.getAllAbilities().forEach(AbilityAttributes::reset);
+        }
+        if (abilityHandler != null) {
+            abilityHandler.reset();
         }
         registry = null;
         actionbarHandler = null;

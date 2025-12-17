@@ -31,6 +31,15 @@ public class Registry {
         registerGlitch("immortality",
                 new com.petrol.GlitchSMP.items.ImmortalityGlitchItem(plugin),
                 new com.petrol.GlitchSMP.glitches.ImmortalityGlitchAbility());
+        registerGlitch("fake_block",
+                new com.petrol.GlitchSMP.items.FakeBlockGlitchItem(plugin),
+                new com.petrol.GlitchSMP.glitches.FakeBlockGlitchAbility());
+        registerGlitch("teleport",
+                new com.petrol.GlitchSMP.items.TeleportGlitchItem(plugin),
+                new com.petrol.GlitchSMP.glitches.TeleportGlitchAbility());
+        registerGlitch("virus",
+                new com.petrol.GlitchSMP.items.VirusGlitchItem(plugin),
+                new com.petrol.GlitchSMP.glitches.VirusGlitchAbility());
         // ...add real glitches here...
     }
 
