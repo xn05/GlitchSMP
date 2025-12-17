@@ -7,31 +7,32 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.List;
 
-public class WindburstGlitchItem implements ItemAttributes {
+public class GravityGlitchItem implements ItemAttributes {
     private final Plugin plugin;
     private final NamespacedKey key;
 
-    public WindburstGlitchItem(Plugin plugin) {
+    public GravityGlitchItem(Plugin plugin) {
         this.plugin = plugin;
-        this.key = new NamespacedKey(plugin, "windburst_glitch");
+        this.key = new NamespacedKey(plugin, "gravity_glitch");
     }
 
     @Override
     public String getId() {
-        return "windburst";
+        return "gravity";
     }
 
     @Override
     public String getDisplayName() {
-        return "§fWindburst Glitch";
+        return "§9Gravity Glitch";
     }
 
     @Override
     public List<String> getLore() {
         return List.of(
-                "§730s Cooldown",
+                "§71m Cooldown",
                 "",
-                "§fLaunches you forward rapidly"
+                "§fFor 15s players within a 7 block radius",
+                "§fwill have low gravity."
         );
     }
 
@@ -42,7 +43,7 @@ public class WindburstGlitchItem implements ItemAttributes {
 
     @Override
     public int getCustomModelData() {
-        return 7;
+        return 10;
     }
 
     @Override
