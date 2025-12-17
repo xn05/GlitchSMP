@@ -48,12 +48,10 @@ public class FakeBlockGlitchAbility implements AbilityAttributes {
     }
 
     @Override
-    public TriggerResult onControlActivation(PlayerInteractEvent event, AbilityHandler.Slot slot, ControlHandler.ActivationAction action) {
-        Player player = event.getPlayer();
+    public TriggerResult onControlActivation(Player player, AbilityHandler.Slot slot, ControlHandler.ActivationAction action) {
         ItemStack held = player.getInventory().getItemInMainHand();
         if (held == null || !held.getType().isBlock()) {
             player.sendMessage(ChatColor.RED + "You must be holding a block to use this ability.");
-            event.setCancelled(true);
             return TriggerResult.none();
         }
 
@@ -77,5 +75,10 @@ public class FakeBlockGlitchAbility implements AbilityAttributes {
 
         player.sendMessage(ChatColor.GREEN + "Fake block placed! Activate again to remove it and place a new one.");
         return TriggerResult.consume(getCooldownMillis());
+    }
+
+    @Override
+    public TriggerResult onOffhandSwap(Player player, AbilityHandler.Slot slot) {
+        return onControlActivation(player, slot, ControlHandler.ActivationAction.OFFHAND);
     }
 }

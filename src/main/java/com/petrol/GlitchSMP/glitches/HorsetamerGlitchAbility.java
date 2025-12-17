@@ -9,7 +9,6 @@ import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.SkeletonHorse;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
@@ -39,8 +38,7 @@ public class HorsetamerGlitchAbility implements AbilityAttributes {
     }
 
     @Override
-    public TriggerResult onControlActivation(PlayerInteractEvent event, AbilityHandler.Slot slot, ControlHandler.ActivationAction action) {
-        Player player = event.getPlayer();
+    public TriggerResult onControlActivation(Player player, AbilityHandler.Slot slot, ControlHandler.ActivationAction action) {
         SkeletonHorse horse = player.getWorld().spawn(player.getLocation(), SkeletonHorse.class);
         horse.getInventory().setSaddle(new ItemStack(Material.SADDLE));
         horse.setTamed(true);
@@ -48,5 +46,10 @@ public class HorsetamerGlitchAbility implements AbilityAttributes {
         player.sendMessage(ChatColor.GREEN + "Skeleton horse summoned!");
         horse.getAttribute(Attribute.MAX_HEALTH).setBaseValue(13 + Math.random() * 2); // Set health to 13-15
         return TriggerResult.consume(getCooldownMillis());
+    }
+
+    @Override
+    public TriggerResult onOffhandSwap(Player player, AbilityHandler.Slot slot) {
+        return onControlActivation(player, slot, ControlHandler.ActivationAction.OFFHAND);
     }
 }

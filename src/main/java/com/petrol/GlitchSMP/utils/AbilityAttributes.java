@@ -88,7 +88,7 @@ public interface AbilityAttributes {
     }
 
     /** Routed activation based on the player's configured control. */
-    default TriggerResult onControlActivation(PlayerInteractEvent event, AbilityHandler.Slot slot,
+    default TriggerResult onControlActivation(Player player, AbilityHandler.Slot slot,
                                              ControlHandler.ActivationAction action) {
         return TriggerResult.none();
     }
@@ -103,8 +103,8 @@ public interface AbilityAttributes {
         return TriggerResult.none();
     }
 
-    /** Triggered when the player swaps items with their offhand while sneaking. */
-    default TriggerResult onOffhandSwap(PlayerSwapHandItemsEvent event) {
+    /** Triggered when the player swaps items with their offhand. */
+    default TriggerResult onOffhandSwap(Player player, AbilityHandler.Slot slot) {
         return TriggerResult.none();
     }
 

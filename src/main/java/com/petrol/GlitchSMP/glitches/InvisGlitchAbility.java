@@ -51,8 +51,7 @@ public class InvisGlitchAbility implements AbilityAttributes {
     }
 
     @Override
-    public TriggerResult onControlActivation(PlayerInteractEvent event, AbilityHandler.Slot slot, ControlHandler.ActivationAction action) {
-        Player player = event.getPlayer();
+    public TriggerResult onControlActivation(Player player, AbilityHandler.Slot slot, ControlHandler.ActivationAction action) {
         if (isActive(player)) {
             player.sendMessage(ChatColor.RED + "Invis Glitch is already active!");
             return TriggerResult.none();
@@ -67,6 +66,11 @@ public class InvisGlitchAbility implements AbilityAttributes {
         activeBossBars.put(player.getUniqueId(), bossBar);
         player.sendMessage(ChatColor.AQUA + "You are now invisible for 30 seconds!");
         return TriggerResult.consume(getCooldownMillis());
+    }
+
+    @Override
+    public TriggerResult onOffhandSwap(Player player, AbilityHandler.Slot slot) {
+        return onControlActivation(player, slot, ControlHandler.ActivationAction.OFFHAND);
     }
 
     @Override

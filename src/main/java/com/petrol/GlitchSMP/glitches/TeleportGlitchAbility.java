@@ -44,9 +44,8 @@ public class TeleportGlitchAbility implements AbilityAttributes {
     }
 
     @Override
-    public TriggerResult onControlActivation(PlayerInteractEvent event, AbilityHandler.Slot slot,
+    public TriggerResult onControlActivation(Player player, AbilityHandler.Slot slot,
                                              ControlHandler.ActivationAction action) {
-        Player player = event.getPlayer();
         Block target = player.getTargetBlockExact(50);
         if (target == null) {
             player.sendMessage(ChatColor.RED + "No block in range!");
@@ -64,6 +63,11 @@ public class TeleportGlitchAbility implements AbilityAttributes {
         animateParticleLine(from, to);
 
         return TriggerResult.consume(getCooldownMillis());
+    }
+
+    @Override
+    public TriggerResult onOffhandSwap(Player player, AbilityHandler.Slot slot) {
+        return onControlActivation(player, slot, ControlHandler.ActivationAction.OFFHAND);
     }
 
     private void animateParticleLine(Location from, Location to) {

@@ -60,8 +60,7 @@ public class RedstoneGlitchAbility implements AbilityAttributes, Listener {
     }
 
     @Override
-    public TriggerResult onControlActivation(PlayerInteractEvent event, AbilityHandler.Slot slot, ControlHandler.ActivationAction action) {
-        Player player = event.getPlayer();
+    public TriggerResult onControlActivation(Player player, AbilityHandler.Slot slot, ControlHandler.ActivationAction action) {
         if (isActive(player)) {
             player.sendMessage(ChatColor.RED + "Redstone Glitch is already active.");
             return TriggerResult.none();
@@ -72,6 +71,11 @@ public class RedstoneGlitchAbility implements AbilityAttributes, Listener {
         int redstoneLevel = countRedstoneBlocks(player);
         player.sendMessage(ChatColor.AQUA + "Redstone Glitch activated for 30 seconds! Redstone Level: " + redstoneLevel);
         return TriggerResult.consume(getCooldownMillis());
+    }
+
+    @Override
+    public TriggerResult onOffhandSwap(Player player, AbilityHandler.Slot slot) {
+        return onControlActivation(player, slot, ControlHandler.ActivationAction.OFFHAND);
     }
 
     @Override

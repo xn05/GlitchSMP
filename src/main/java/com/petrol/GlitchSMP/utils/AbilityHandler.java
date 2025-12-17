@@ -20,6 +20,7 @@ import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -229,10 +230,11 @@ public class AbilityHandler implements Listener {
 
     @EventHandler
     public void onSwap(PlayerSwapHandItemsEvent event) {
-        if (!event.getPlayer().isSneaking()) {
-            return;
+        boolean hasOffhand = Arrays.stream(Slot.values()).anyMatch(slot -> controlHandler.matches(event.getPlayer(), slot, ControlHandler.ActivationAction.OFFHAND));
+        if (hasOffhand) {
+            event.setCancelled(true);
         }
-        handleActivation(event.getPlayer(), ControlHandler.ActivationAction.OFFHAND, ability -> ability.onOffhandSwap(event));
+        handleActivation(event.getPlayer(), ControlHandler.ActivationAction.OFFHAND, (ability, slot) -> ability.onOffhandSwap(event.getPlayer(), slot));
     }
 
     @EventHandler
@@ -334,7 +336,7 @@ public class AbilityHandler implements Listener {
     }
 
     private void handleActivation(Player player, ControlHandler.ActivationAction action,
-                                  Function<AbilityAttributes, AbilityAttributes.TriggerResult> executor) {
+                                  BiFunction<AbilityAttributes, Slot, AbilityAttributes.TriggerResult> executor) {
         for (Slot slot : Slot.values()) {
             if (!controlHandler.matches(player, slot, action)) {
                 continue;
@@ -347,7 +349,7 @@ public class AbilityHandler implements Listener {
             if (!canTrigger(player, ability)) {
                 continue;
             }
-            AbilityAttributes.TriggerResult result = executor.apply(ability);
+            AbilityAttributes.TriggerResult result = executor.apply(ability, slot);
             fire(player, ability, result);
         }
     }
@@ -372,7 +374,7 @@ public class AbilityHandler implements Listener {
                 continue;
             }
             triggerSlot(player, slot, action, (ability, matchedSlot) ->
-                    ability.onControlActivation(event, matchedSlot, action));
+                    ability.onControlActivation(player, matchedSlot, action));
         }
     }
 

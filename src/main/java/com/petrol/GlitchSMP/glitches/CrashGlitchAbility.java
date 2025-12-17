@@ -74,9 +74,8 @@ public class CrashGlitchAbility implements AbilityAttributes {
     }
 
     @Override
-    public TriggerResult onControlActivation(PlayerInteractEvent event, AbilityHandler.Slot slot,
+    public TriggerResult onControlActivation(Player player, AbilityHandler.Slot slot,
                                              ControlHandler.ActivationAction action) {
-        Player player = event.getPlayer();
         if (isWindowActive(player)) {
             long armedAt = lastArmed.getOrDefault(player.getUniqueId(), 0L);
             long now = System.currentTimeMillis();
@@ -95,6 +94,11 @@ public class CrashGlitchAbility implements AbilityAttributes {
         showBossBar(player, expiry);
         player.sendMessage(ChatColor.AQUA + "Crash Glitch armed. Hit a player within 15s!");
         return TriggerResult.consume(getCooldownMillis());
+    }
+
+    @Override
+    public TriggerResult onOffhandSwap(Player player, AbilityHandler.Slot slot) {
+        return onControlActivation(player, slot, ControlHandler.ActivationAction.OFFHAND);
     }
 
     @Override

@@ -54,8 +54,7 @@ public class VirusGlitchAbility implements AbilityAttributes {
     }
 
     @Override
-    public TriggerResult onControlActivation(PlayerInteractEvent event, AbilityHandler.Slot slot, ControlHandler.ActivationAction action) {
-        Player player = event.getPlayer();
+    public TriggerResult onControlActivation(Player player, AbilityHandler.Slot slot, ControlHandler.ActivationAction action) {
         if (isActive(player)) {
             player.sendMessage(ChatColor.RED + "Virus Glitch is already active!");
             return TriggerResult.none();
@@ -70,6 +69,11 @@ public class VirusGlitchAbility implements AbilityAttributes {
         activeBossBars.put(player.getUniqueId(), bossBar);
         player.sendMessage(ChatColor.AQUA + "Virus Glitch activated for 15 seconds!");
         return TriggerResult.consume(getCooldownMillis());
+    }
+
+    @Override
+    public TriggerResult onOffhandSwap(Player player, AbilityHandler.Slot slot) {
+        return onControlActivation(player, slot, ControlHandler.ActivationAction.OFFHAND);
     }
 
     @Override

@@ -5,7 +5,6 @@ import com.petrol.GlitchSMP.utils.AbilityAttributes;
 import com.petrol.GlitchSMP.utils.AbilityHandler;
 import com.petrol.GlitchSMP.utils.ControlHandler;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.Plugin;
@@ -38,15 +37,21 @@ public class GravityGlitchAbility implements AbilityAttributes {
     }
 
     @Override
-    public TriggerResult onControlActivation(PlayerInteractEvent event, AbilityHandler.Slot slot, ControlHandler.ActivationAction action) {
-        Player player = event.getPlayer();
-        // Apply slow falling to nearby players
-        for (Entity entity : player.getWorld().getNearbyEntities(player.getLocation(), 7, 7, 7)) {
-            if (entity instanceof Player target && !target.equals(player)) {
-                target.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 300, 0)); // 15 seconds
-            }
-        }
-        player.sendMessage(ChatColor.GREEN + "Gravity Glitch activated! Nearby players have low gravity for 15 seconds!");
+    public TriggerResult onControlActivation(Player player, AbilityHandler.Slot slot, ControlHandler.ActivationAction action) {
+        // Apply low gravity to nearby players except self
+        player.getWorld().getPlayers().stream()
+                .filter(p -> !p.equals(player))
+                .filter(p -> p.getLocation().distance(player.getLocation()) <= 7)
+                .forEach(p -> {
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 300, 0)); // 15 seconds
+                    p.sendMessage(ChatColor.BLUE + "You feel lighter!");
+                });
+        player.sendMessage(ChatColor.GREEN + "Gravity Glitch activated! Nearby players have low gravity for 15 seconds.");
         return TriggerResult.consume(getCooldownMillis());
+    }
+
+    @Override
+    public TriggerResult onOffhandSwap(Player player, AbilityHandler.Slot slot) {
+        return onControlActivation(player, slot, ControlHandler.ActivationAction.OFFHAND);
     }
 }

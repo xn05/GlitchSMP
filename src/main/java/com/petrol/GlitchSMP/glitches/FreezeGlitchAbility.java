@@ -89,8 +89,7 @@ public class FreezeGlitchAbility implements AbilityAttributes, Listener {
     }
 
     @Override
-    public TriggerResult onControlActivation(PlayerInteractEvent event, AbilityHandler.Slot slot, ControlHandler.ActivationAction action) {
-        Player player = event.getPlayer();
+    public TriggerResult onControlActivation(Player player, AbilityHandler.Slot slot, ControlHandler.ActivationAction action) {
         long expiry = System.currentTimeMillis() + DURATION_READY_MILLIS;
         readyToFreeze.put(player.getUniqueId(), expiry);
         player.sendMessage(ChatColor.AQUA + "Freeze Glitch activated! Your next hit within 15 seconds will freeze the target.");
@@ -100,6 +99,11 @@ public class FreezeGlitchAbility implements AbilityAttributes, Listener {
         bossBar.setProgress(1.0);
         activeBossBars.put(player.getUniqueId(), bossBar);
         return TriggerResult.consume(getCooldownMillis());
+    }
+
+    @Override
+    public TriggerResult onOffhandSwap(Player player, AbilityHandler.Slot slot) {
+        return onControlActivation(player, slot, ControlHandler.ActivationAction.OFFHAND);
     }
 
     @Override

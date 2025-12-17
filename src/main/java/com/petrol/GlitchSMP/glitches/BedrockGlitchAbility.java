@@ -63,13 +63,17 @@ public class BedrockGlitchAbility implements AbilityAttributes, Listener {
     }
 
     @Override
-    public TriggerResult onControlActivation(PlayerInteractEvent event, AbilityHandler.Slot slot, ControlHandler.ActivationAction action) {
-        Player player = event.getPlayer();
+    public TriggerResult onControlActivation(Player player, AbilityHandler.Slot slot, ControlHandler.ActivationAction action) {
         long expiry = System.currentTimeMillis() + DURATION_ACTIVE_MILLIS;
         activeUntil.put(player.getUniqueId(), expiry);
         showBossBar(player, expiry);
         player.sendMessage(ChatColor.AQUA + "Bedrock Glitch activated! For 15 seconds, all blocks you place will be unbreakable.");
         return TriggerResult.consume(getCooldownMillis());
+    }
+
+    @Override
+    public TriggerResult onOffhandSwap(Player player, AbilityHandler.Slot slot) {
+        return onControlActivation(player, slot, ControlHandler.ActivationAction.OFFHAND);
     }
 
     @Override

@@ -64,9 +64,8 @@ public class DreamGlitchAbility implements AbilityAttributes {
     }
 
     @Override
-    public TriggerResult onControlActivation(PlayerInteractEvent event, AbilityHandler.Slot slot,
+    public TriggerResult onControlActivation(Player player, AbilityHandler.Slot slot,
                                              ControlHandler.ActivationAction action) {
-        Player player = event.getPlayer();
         if (isActive(player)) {
             player.sendMessage(ChatColor.RED + "Dream Glitch is already active!");
             return TriggerResult.none();
@@ -76,6 +75,11 @@ public class DreamGlitchAbility implements AbilityAttributes {
         showBossBar(player, expiry);
         player.sendMessage(ChatColor.AQUA + "Dream Glitch activated for 2 minutes!");
         return TriggerResult.consume(getCooldownMillis());
+    }
+
+    @Override
+    public TriggerResult onOffhandSwap(Player player, AbilityHandler.Slot slot) {
+        return onControlActivation(player, slot, ControlHandler.ActivationAction.OFFHAND);
     }
 
     @Override

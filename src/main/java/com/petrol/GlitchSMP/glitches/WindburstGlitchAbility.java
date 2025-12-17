@@ -38,8 +38,7 @@ public class WindburstGlitchAbility implements AbilityAttributes {
     }
 
     @Override
-    public TriggerResult onControlActivation(PlayerInteractEvent event, AbilityHandler.Slot slot, ControlHandler.ActivationAction action) {
-        Player player = event.getPlayer();
+    public TriggerResult onControlActivation(Player player, AbilityHandler.Slot slot, ControlHandler.ActivationAction action) {
         // Launch the player forward and up
         Vector direction = player.getLocation().getDirection();
         Vector velocity = direction.multiply(6).setY(1); // Adjust for 30 blocks forward and some height
@@ -48,5 +47,10 @@ public class WindburstGlitchAbility implements AbilityAttributes {
         player.getWorld().spawnParticle(Particle.CLOUD, player.getLocation(), 50, 0.5, 0.5, 0.5, 0.1);
         player.sendMessage(ChatColor.GREEN + "Windburst activated! Launched forward!");
         return TriggerResult.consume(getCooldownMillis());
+    }
+
+    @Override
+    public TriggerResult onOffhandSwap(Player player, AbilityHandler.Slot slot) {
+        return onControlActivation(player, slot, ControlHandler.ActivationAction.OFFHAND);
     }
 }
