@@ -46,6 +46,9 @@ public class Registry {
         registerGlitch("invis",
                 new com.petrol.GlitchSMP.items.InvisGlitchItem(plugin),
                 new com.petrol.GlitchSMP.glitches.InvisGlitchAbility());
+        registerGlitch("windburst",
+                new com.petrol.GlitchSMP.items.WindburstGlitchItem(plugin),
+                new com.petrol.GlitchSMP.glitches.WindburstGlitchAbility());
         // ...add real glitches here...
     }
 
