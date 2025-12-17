@@ -19,18 +19,18 @@ A Minecraft plugin for Spigot/Paper servers that introduces "Glitch" abilities, 
 | Redstone | 2m 30s   | Redstone-related effects. |
 | Dream | 5m       | Dream-themed abilities. |
 | Freeze | 1m 30s   | Freeze enemies or time. |
-| Bedrock | ?        | Bedrock manipulation. |
-| Immortality | ?        | Temporary invincibility. |
-| Fake Block | ?        | Create illusionary blocks. |
-| Teleport | ?        | Teleportation abilities. |
-| Virus | ?        | Spread effects to enemies. |
-| Horsetamer | ?        | Horse-related powers. |
-| Invis | ?        | Invisibility effects. |
-| Windburst | ?        | Wind or knockback effects. |
-| Enchanter | ?        | Enchantment enhancements. |
+| Bedrock | 2m       | Bedrock manipulation. |
+| Immortality | 5m       | Temporary invincibility. |
+| Fake Block | 2m       | Create illusionary blocks. |
+| Teleport | 2m       | Teleportation abilities. |
+| Virus | 2m       | Spread effects to enemies. |
+| Horsetamer | 10m      | Horse-related powers. |
+| Invis | 4m       | Invisibility effects. |
+| Windburst | 30s      | Wind or knockback effects. |
+| Enchanter | 3m       | Enchantment enhancements. |
 | Shulker | 4m       | Access crafting table, ender chest, and anvil through a GUI. |
-| Xray | ?        | Highlight nearby players and ores with glowing effects. |
-| Gravity | ?        | Manipulate gravity. |
+| Xray | 4m       | Highlight nearby players and ores with glowing effects. |
+| Gravity | 1m       | Manipulate gravity. |
 | Duality | 3m       | For 10s: Freeze hit enemies for 2s, burn nearby enemies within 2 blocks. Freeze + burn nullify each other. |
 
 *Note: Some glitch descriptions are placeholders; refer to in-game tooltips for exact mechanics.*
