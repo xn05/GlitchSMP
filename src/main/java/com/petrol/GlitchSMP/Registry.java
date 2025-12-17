@@ -49,9 +49,21 @@ public class Registry {
         registerGlitch("windburst",
                 new com.petrol.GlitchSMP.items.WindburstGlitchItem(plugin),
                 new com.petrol.GlitchSMP.glitches.WindburstGlitchAbility());
+        registerGlitch("enchanter",
+                new com.petrol.GlitchSMP.items.EnchanterGlitchItem(plugin),
+                new com.petrol.GlitchSMP.glitches.EnchanterGlitchAbility());
+        registerGlitch("shulker",
+                new com.petrol.GlitchSMP.items.ShulkerGlitchItem(plugin),
+                new com.petrol.GlitchSMP.glitches.ShulkerGlitchAbility());
+        registerGlitch("xray",
+                new com.petrol.GlitchSMP.items.XRayGlitchItem(plugin),
+                new com.petrol.GlitchSMP.glitches.XRayGlitchAbility());
         registerGlitch("gravity",
                 new com.petrol.GlitchSMP.items.GravityGlitchItem(plugin),
                 new com.petrol.GlitchSMP.glitches.GravityGlitchAbility());
+        registerGlitch("duality",
+                new com.petrol.GlitchSMP.items.DualityGlitchItem(plugin),
+                new com.petrol.GlitchSMP.glitches.DualityGlitchAbility());
         // ...add real glitches here...
     }
 

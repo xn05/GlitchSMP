@@ -1,6 +1,7 @@
 package com.petrol.GlitchSMP.utils;
 
 import com.petrol.GlitchSMP.Registry;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -70,9 +71,7 @@ public class EquipHandler implements Listener {
     }
 
     private Optional<String> findGlitchId(ItemStack item) {
-        return registry.getAllItems().stream()
-                .filter(attrs -> item.getItemMeta().getPersistentDataContainer().has(attrs.getKey(), PersistentDataType.STRING))
-                .map(ItemAttributes::getId)
-                .findFirst();
+        String id = item.getItemMeta().getPersistentDataContainer().get(new NamespacedKey(registry.getPlugin(), "glitch_id"), PersistentDataType.STRING);
+        return Optional.ofNullable(id);
     }
 }

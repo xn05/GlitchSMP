@@ -22,9 +22,9 @@ public final class GlitchSMP extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        registry = Registry.initialize(this);
         dataHandler = new DataHandler(this);
         dataHandler.load();
+        registry = Registry.initialize(this);
 
         controlHandler = new ControlHandler(dataHandler);
         Bukkit.getPluginManager().registerEvents(controlHandler, this);
@@ -136,5 +136,9 @@ public final class GlitchSMP extends JavaPlugin {
 
     public AbilityHandler getAbilityHandler() {
         return abilityHandler;
+    }
+
+    public DataHandler getDataHandler() {
+        return dataHandler;
     }
 }

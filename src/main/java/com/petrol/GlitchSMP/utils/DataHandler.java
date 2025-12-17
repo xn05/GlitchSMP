@@ -83,6 +83,15 @@ public class DataHandler {
         save();
     }
 
+    public void setData(UUID uuid, String key, String value) {
+        config.set("players." + uuid + ".data." + key, value);
+        save();
+    }
+
+    public String getData(UUID uuid, String key) {
+        return config.getString("players." + uuid + ".data." + key);
+    }
+
     private void ensureConfig() {
         if (config == null) {
             load();
