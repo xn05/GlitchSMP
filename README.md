@@ -108,4 +108,3 @@ For issues or questions, open an issue on the repository or contact the maintain
 ---
 
 *</content>
-<parameter name="filePath">G:\My Drive\glitchsmp\README.md
