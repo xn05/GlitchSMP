@@ -42,7 +42,7 @@ public class GravityGlitchAbility implements AbilityAttributes {
         Player player = event.getPlayer();
         // Apply slow falling to nearby players
         for (Entity entity : player.getWorld().getNearbyEntities(player.getLocation(), 7, 7, 7)) {
-            if (entity instanceof Player target) {
+            if (entity instanceof Player target && !target.equals(player)) {
                 target.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 300, 0)); // 15 seconds
             }
         }
