@@ -23,8 +23,8 @@ import java.util.Set;
 import java.util.UUID;
 
 public class DualityGlitchAbility implements AbilityAttributes, Listener {
-    private static final long COOLDOWN_SECONDS = 180L;
-    private static final long DURATION_MILLIS = 10000L; // 10 seconds
+    private static final long COOLDOWN_SECONDS = 120L;
+    private static final long DURATION_MILLIS = 15000L; // 15 seconds
 
     private final Plugin plugin = Registry.get().getPlugin();
     private final Map<UUID, Long> activeUntil = new HashMap<>();

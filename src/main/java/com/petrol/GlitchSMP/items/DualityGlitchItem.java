@@ -35,9 +35,9 @@ public class DualityGlitchItem implements ItemAttributes {
     @Override
     public List<String> getLore() {
         return Arrays.asList(
-                ChatColor.GRAY + "3m cooldown",
+                ChatColor.GRAY + "2m cooldown",
                 "",
-                ChatColor.WHITE + "For 10s: Hits freeze enemies for 2s,",
+                ChatColor.WHITE + "For 15s: Hits freeze enemies for 2s,",
                 ChatColor.WHITE + "burn nearby enemies within 2 blocks. "
         );
     }
